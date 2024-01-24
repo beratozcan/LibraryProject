@@ -51,6 +51,9 @@ namespace NLayer.Repository.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int?>("UserId")
+                        .HasColumnType("int");
+
                     b.Property<bool>("haveRead")
                         .HasColumnType("bit");
 
@@ -60,6 +63,8 @@ namespace NLayer.Repository.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("CategoryId");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("Books", (string)null);
                 });
@@ -76,12 +81,7 @@ namespace NLayer.Repository.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
-
-                    b.HasIndex("UserId");
 
                     b.ToTable("Categories", (string)null);
                 });
@@ -115,18 +115,11 @@ namespace NLayer.Repository.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("NLayer.Core.Models.User", null)
+                        .WithMany("Books")
+                        .HasForeignKey("UserId");
+
                     b.Navigation("Category");
-                });
-
-            modelBuilder.Entity("NLayer.Core.Models.Category", b =>
-                {
-                    b.HasOne("NLayer.Core.Models.User", "User")
-                        .WithMany("Categories")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("NLayer.Core.Models.Category", b =>
@@ -136,7 +129,7 @@ namespace NLayer.Repository.Migrations
 
             modelBuilder.Entity("NLayer.Core.Models.User", b =>
                 {
-                    b.Navigation("Categories");
+                    b.Navigation("Books");
                 });
 #pragma warning restore 612, 618
         }
