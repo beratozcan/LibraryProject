@@ -1,9 +1,5 @@
-﻿
-
-using AutoMapper;
-using Microsoft.EntityFrameworkCore;
+﻿using AutoMapper;
 using NLayer.Core;
-using NLayer.Core.DTOs;
 using NLayer.Core.Models;
 using NLayer.Core.Repositories;
 using NLayer.Core.Services;
@@ -27,6 +23,11 @@ namespace NLayer.Service.Services
         public async Task<IEnumerable<Book>> GetBorrowedBooksAsync()
         {
             return await _repository.GetBorrowedBooksAsync();
+        }
+
+        public async Task<IEnumerable<Book>> GetFinishedBooksAsync()
+        {
+            return await _repository.GetFinishedBooksAsync();
         }
     }
 }

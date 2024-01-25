@@ -46,6 +46,15 @@ namespace NLayer.API.Controllers
             return CreateActionResult(CustomResponseDTO<List<BorrowedBookDTO>>.Success(200,borrowedBooksDTO));
         }
 
+        [HttpGet("finished")]
+        public async Task<IActionResult> GetFinishedBooks()
+        {
+            var finishedBooks = await _service.GetFinishedBooksAsync();
+            var finishedBooksDTO = _mapper.Map<List<FinishedBookDTO>>(finishedBooks);
+
+            return CreateActionResult(CustomResponseDTO<List<FinishedBookDTO>>.Success(200, finishedBooksDTO));
+        }
+
         [HttpPost]
         public async Task<IActionResult> Save(BookPostDTO bookDTO)
         {
