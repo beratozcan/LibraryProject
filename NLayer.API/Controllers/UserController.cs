@@ -1,5 +1,4 @@
 ﻿using AutoMapper;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using NLayer.Core.DTOs;
 using NLayer.Core.Models;
@@ -41,7 +40,7 @@ namespace NLayer.API.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Save(UserDTO userDTO)
+        public async Task<IActionResult> Save(UserPostDTO userDTO)
         {
             var user = await _service.AddAsync(_mapper.Map<User>(userDTO));
 

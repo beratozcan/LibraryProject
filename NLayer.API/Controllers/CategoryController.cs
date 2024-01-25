@@ -1,5 +1,4 @@
 ﻿using AutoMapper;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using NLayer.Core.DTOs;
 using NLayer.Core.Models;
@@ -40,13 +39,13 @@ namespace NLayer.API.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Save(CategoryDTO categoryDTO)
+        public async Task<IActionResult> Save(CategoryPostDTO categoryDTO)
         {
             var category = await _service.AddAsync(_mapper.Map<Category>(categoryDTO));
 
             var _categoryDTO = _mapper.Map<CategoryDTO>(category);
 
-            return CreateActionResult(CustomResponseDTO<NoContentDTO>.Success(204));
+            return CreateActionResult(CustomResponseDTO<CategoryDTO>.Success(201,_categoryDTO));
         }
 
         [HttpPut]

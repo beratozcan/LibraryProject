@@ -7,7 +7,6 @@ namespace NLayer.API.Middlewares
 {
     public static class UseCustomExceptionHandler
     {
-
         public static void UseCustomException(this IApplicationBuilder app)
         {
             app.UseExceptionHandler(config =>
@@ -27,28 +26,13 @@ namespace NLayer.API.Middlewares
                     };
                     context.Response.StatusCode = statusCode;
 
-
                     var response = CustomResponseDTO<NoContentDTO>.Fail(statusCode, exceptionFeature.Error.Message);
-
 
                     await context.Response.WriteAsync(JsonSerializer.Serialize(response));
 
                 });
 
-
-
-
-
-
-
-
-
-
             });
-
-
-
-
 
         }
     }

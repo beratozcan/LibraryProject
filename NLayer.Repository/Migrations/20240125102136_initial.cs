@@ -52,7 +52,7 @@ namespace NLayer.Repository.Migrations
                     haveRead = table.Column<bool>(type: "bit", nullable: false),
                     isBorrowed = table.Column<bool>(type: "bit", nullable: false),
                     CategoryId = table.Column<int>(type: "int", nullable: false),
-                    UserId = table.Column<int>(type: "int", nullable: true)
+                    UserId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -67,7 +67,8 @@ namespace NLayer.Repository.Migrations
                         name: "FK_Books_Users_UserId",
                         column: x => x.UserId,
                         principalTable: "Users",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateIndex(

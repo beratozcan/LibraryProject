@@ -12,7 +12,7 @@ using NLayer.Repository;
 namespace NLayer.Repository.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20240124152232_initial")]
+    [Migration("20240125102136_initial")]
     partial class initial
     {
         /// <inheritdoc />
@@ -54,7 +54,7 @@ namespace NLayer.Repository.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("UserId")
+                    b.Property<int>("UserId")
                         .HasColumnType("int");
 
                     b.Property<bool>("haveRead")
@@ -118,11 +118,15 @@ namespace NLayer.Repository.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("NLayer.Core.Models.User", null)
+                    b.HasOne("NLayer.Core.Models.User", "User")
                         .WithMany("Books")
-                        .HasForeignKey("UserId");
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Category");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("NLayer.Core.Models.Category", b =>

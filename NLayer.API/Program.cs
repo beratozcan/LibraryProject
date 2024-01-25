@@ -1,5 +1,4 @@
 using Microsoft.EntityFrameworkCore;
-using Microsoft.OpenApi.Extensions;
 using NLayer.Core;
 using NLayer.Core.Repositories;
 using NLayer.Core.Services;
@@ -24,15 +23,11 @@ builder.Services.AddScoped(typeof(IService<>), typeof(Service<>));
 
 builder.Services.AddAutoMapper(typeof(MapProfile));
 
-
-
 builder.Services.AddDbContext<AppDbContext>(x =>
-
 
     x.UseSqlServer(builder.Configuration.GetConnectionString("SqlConnection"), option =>
     {
         option.MigrationsAssembly(Assembly.GetAssembly(typeof(AppDbContext)).GetName().Name);
-
 
     }
     )
@@ -46,11 +41,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-
 app.UseHttpsRedirection();
-
 app.UseAuthorization();
-
 app.MapControllers();
-
 app.Run();

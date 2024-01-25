@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Linq.Expressions;
 
 namespace NLayer.Core.Repositories
 {
@@ -11,7 +6,6 @@ namespace NLayer.Core.Repositories
     {
         Task<IEnumerable<T>> GetAllAsync();
         IQueryable<T> WhereAsync(Expression<Func<T,bool>> predicate);
-
         Task<bool> AnyAsync(Expression<Func<T, bool>> predicate);
         Task<T> GetByIdAsync(int id);
         Task AddAsync(T entity);

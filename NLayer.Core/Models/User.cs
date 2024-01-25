@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace NLayer.Core.Models
 {
@@ -11,6 +7,7 @@ namespace NLayer.Core.Models
         public int Id { get; set; }
         public string UserName { get; set; }
         public string Password { get; set; }
+        [Required]
         public List<Book> Books {  get; set; }
     }
 }

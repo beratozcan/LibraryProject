@@ -1,6 +1,4 @@
 ﻿using AutoMapper;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using NLayer.Core.DTOs;
 using NLayer.Core.Models;
@@ -39,7 +37,7 @@ namespace NLayer.API.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Save(BookDTO bookDTO)
+        public async Task<IActionResult> Save(BookPostDTO bookDTO)
         {
             var book = await _service.AddAsync(_mapper.Map<Book>(bookDTO));
 
