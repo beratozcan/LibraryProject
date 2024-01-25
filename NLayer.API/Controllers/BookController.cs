@@ -11,12 +11,12 @@ namespace NLayer.API.Controllers
     public class BookController : CustomController
     {
         private readonly IMapper _mapper;
-        private readonly IService<Book> _service;
+        private readonly IBookService _service;
 
-        public BookController(IMapper mapper, IService<Book> service)
+        public BookController(IMapper mapper, IBookService bookService)
         {
             _mapper = mapper;
-            _service = service;
+            _service = bookService;
         }
 
         [HttpGet]
@@ -28,12 +28,22 @@ namespace NLayer.API.Controllers
         }
 
         [HttpGet("{id}")]
+
         public async Task<IActionResult> GetById(int id)
         {
             var book = await _service.GetByIdAsync(id);
             var bookDTO = _mapper.Map<BookDTO>(book);
             return CreateActionResult(CustomResponseDTO<BookDTO>.Success(200, bookDTO));
 
+        }
+
+        [HttpGet("borrowed")]
+        public async Task<IActionResult> GetBorrowedBooks()
+        {
+            var borrowedBooks = await _service.GetBorrowedBooksAsync();
+            var borrowedBooksDTO = _mapper.Map<List<BorrowedBookDTO>>(borrowedBooks);
+
+            return CreateActionResult(CustomResponseDTO<List<BorrowedBookDTO>>.Success(200,borrowedBooksDTO));
         }
 
         [HttpPost]
