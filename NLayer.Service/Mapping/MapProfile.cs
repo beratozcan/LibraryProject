@@ -16,7 +16,8 @@ namespace NLayer.Service.Mapping
             CreateMap<Book,BookDTO>().ReverseMap();
             CreateMap<Category,CategoryDTO>().ReverseMap();
             CreateMap<User,UserDTO>().ReverseMap();
-            
+            CreateMap<UpdateBookDTO,BookDTO>().ReverseMap();
+            CreateMap<UpdateBookDTO, Book>().ReverseMap();
         }
 
     }

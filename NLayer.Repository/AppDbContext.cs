@@ -26,6 +26,11 @@ namespace NLayer.Repository
         {
             modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
 
+            modelBuilder.Entity<Book>()
+        .HasOne(b => b.Category)
+        .WithMany(c => c.Books)
+        .HasForeignKey(b => b.CategoryId);
+
             base.OnModelCreating(modelBuilder);
         }
 
