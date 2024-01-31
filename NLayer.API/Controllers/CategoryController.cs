@@ -1,8 +1,9 @@
-﻿using AutoMapper;
+﻿
 using Microsoft.AspNetCore.Mvc;
 using NLayer.Core.DTOs;
 using NLayer.Core.Models;
 using NLayer.Core.Services;
+using NLayer.Service.Mapping;
 
 namespace NLayer.API.Controllers
 {
@@ -10,12 +11,13 @@ namespace NLayer.API.Controllers
     [ApiController]
     public class CategoryController : CustomController
     {
-        private readonly IMapper _mapper;
+        
         private readonly IService<Category> _service;
+        private readonly EntityMapper _entityMapper;
 
-        public CategoryController(IMapper mapper, IService<Category> service)
+        public CategoryController(IService<Category> service, EntityMapper entityMapper)
         {
-            _mapper = mapper;
+            _entityMapper = entityMapper;
             _service = service;
         }
 
@@ -23,9 +25,9 @@ namespace NLayer.API.Controllers
         public async Task<IActionResult> All()
         {
             var categories = await _service.GetAllAsync();
-            var categoriesDTO = _mapper.Map<List<CategoryDTO>>(categories.ToList());
+            var categoriesModel = categories.Select(category => _entityMapper.CategoryMapEntityToModel(category)).ToList();
 
-            return CreateActionResult(CustomResponseDTO<List<CategoryDTO>>.Success(200, categoriesDTO));
+            return CreateActionResult(CustomResponseModel<List<CategoryModel>>.Success(200, categoriesModel));
 
         }
 
@@ -33,27 +35,30 @@ namespace NLayer.API.Controllers
         public async Task<IActionResult> GetById(int id)
         {
             var category = await _service.GetByIdAsync(id);
-            var categoryDTO = _mapper.Map<CategoryDTO>(category);
+            var categoryModel = _entityMapper.CategoryMapEntityToModel(category);
             
-            return CreateActionResult(CustomResponseDTO<CategoryDTO>.Success(200, categoryDTO));  
+            return CreateActionResult(CustomResponseModel<CategoryModel>.Success(200, categoryModel));  
         }
 
         [HttpPost]
-        public async Task<IActionResult> Save(CategoryPostDTO categoryDTO)
+        public async Task<IActionResult> Save(CategoryPostModel categoryModel)
         {
-            var category = await _service.AddAsync(_mapper.Map<Category>(categoryDTO));
+            var category = await _service.AddAsync(_entityMapper.CategoryPostMapEntityToModel(categoryModel));
 
-            var _categoryDTO = _mapper.Map<CategoryDTO>(category);
+            var _categoryModel = _entityMapper.CategoryMapEntityToModel(category);
 
-            return CreateActionResult(CustomResponseDTO<CategoryDTO>.Success(201,_categoryDTO));
+            return CreateActionResult(CustomResponseModel<CategoryModel>.Success(201,_categoryModel));
         }
 
         [HttpPut]
-        public async Task<IActionResult> Update(CategoryDTO categoryDTO)
+        public async Task<IActionResult> Update(CategoryModel categoryModel)
         {
-            await _service.UpdateAsync(_mapper.Map<Category>(categoryDTO));
 
-            return CreateActionResult(CustomResponseDTO<NoContentDTO>.Success(204));
+            var categoryEntity = await _service.GetByIdAsync(categoryModel.Id);
+
+            await _service.UpdateAsync(_entityMapper.CategoryPutMapEntityToModel(categoryModel, categoryEntity));
+
+            return CreateActionResult(CustomResponseModel<NoContentModel>.Success(204));
         }
 
         [HttpDelete("{id}")]
@@ -63,7 +68,7 @@ namespace NLayer.API.Controllers
 
             await _service.RemoveAsync(category);
 
-            return CreateActionResult(CustomResponseDTO<NoContentDTO>.Success(204));
+            return CreateActionResult(CustomResponseModel<NoContentModel>.Success(204));
         }
     }
 }

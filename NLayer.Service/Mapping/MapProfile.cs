@@ -8,19 +8,19 @@ namespace NLayer.Service.Mapping
     {
         public MapProfile()
         {
-            CreateMap<Book,BookDTO>().ReverseMap();
-            CreateMap<Category,CategoryDTO>().ReverseMap();
-            CreateMap<User,UserDTO>().ReverseMap();
-            CreateMap<User, UserPostDTO>().ReverseMap();
-            CreateMap<UserPostDTO, UserDTO>().ReverseMap();
-            CreateMap<CategoryPostDTO, CategoryDTO>().ReverseMap();
-            CreateMap<CategoryPostDTO, Category>().ReverseMap();
-            CreateMap<BookPostDTO, BookDTO>().ReverseMap();
-            CreateMap<BookPostDTO,Book>().ReverseMap();
-            CreateMap<BorrowedBookDTO,Book>().ReverseMap();
-            CreateMap<BorrowedBookDTO,BookDTO>().ReverseMap();
-            CreateMap<FinishedBookDTO, BookDTO>().ReverseMap();
-            CreateMap<FinishedBookDTO, Book>().ReverseMap();
+            CreateMap<Book,BookModel>().ReverseMap();
+            CreateMap<Category,CategoryModel>().ReverseMap();
+            CreateMap<User,UserModel>().ReverseMap();
+            CreateMap<User, UserPostModel>().ReverseMap();
+            CreateMap<UserPostModel, UserModel>().ReverseMap();
+            CreateMap<CategoryPostModel, CategoryModel>().ReverseMap();
+            CreateMap<CategoryPostModel, Category>().ReverseMap();
+            CreateMap<BookPostModel, BookModel>().ReverseMap();
+            CreateMap<BookPostModel,Book>().ReverseMap();
+            CreateMap<BorrowedBookModel,Book>().ReverseMap();
+            CreateMap<BorrowedBookModel,BookModel>().ReverseMap();
+            CreateMap<FinishedBookModel, BookModel>().ReverseMap();
+            CreateMap<FinishedBookModel, Book>().ReverseMap();
             
         }
 

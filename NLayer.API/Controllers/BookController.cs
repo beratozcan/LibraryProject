@@ -1,8 +1,8 @@
-﻿using AutoMapper;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using NLayer.Core.DTOs;
-using NLayer.Core.Models;
 using NLayer.Core.Services;
+using NLayer.Service.Mapping;
+
 
 namespace NLayer.API.Controllers
 {
@@ -10,21 +10,23 @@ namespace NLayer.API.Controllers
     [ApiController]
     public class BookController : CustomController
     {
-        private readonly IMapper _mapper;
+        
         private readonly IBookService _service;
+        private readonly EntityMapper _entityMapper;
 
-        public BookController(IMapper mapper, IBookService bookService)
+        public BookController(IBookService bookService, EntityMapper entityMapper)
         {
-            _mapper = mapper;
+            
             _service = bookService;
+            _entityMapper = entityMapper;
         }
 
         [HttpGet]
         public async Task<IActionResult> All()
         {
             var books = await _service.GetAllAsync();
-            var booksDTO = _mapper.Map<List<BookDTO>>(books.ToList());
-            return CreateActionResult(CustomResponseDTO<List<BookDTO>>.Success(200, booksDTO));
+            var booksDTO = books.Select(book => _entityMapper.BookMapEntityToModel(book)).ToList();
+            return CreateActionResult(CustomResponseModel<List<BookModel>>.Success(200, booksDTO));
         }
 
         [HttpGet("{id}")]
@@ -32,45 +34,49 @@ namespace NLayer.API.Controllers
         public async Task<IActionResult> GetById(int id)
         {
             var book = await _service.GetByIdAsync(id);
-            var bookDTO = _mapper.Map<BookDTO>(book);
-            return CreateActionResult(CustomResponseDTO<BookDTO>.Success(200, bookDTO));
+            var bookDTO = _entityMapper.BookMapEntityToModel(book); // entitytomodel
+            return CreateActionResult(CustomResponseModel<BookModel>.Success(200, bookDTO));
 
         }
 
         [HttpGet("borrowed")]
         public async Task<IActionResult> GetBorrowedBooks()
         {
-            var borrowedBooks = await _service.GetBorrowedBooksAsync();
-            var borrowedBooksDTO = _mapper.Map<List<BorrowedBookDTO>>(borrowedBooks);
+            var books = await _service.GetBorrowedBooksAsync();
+            var booksModel = books.Select(book => _entityMapper.BookMapEntityToModel(book)).ToList();
 
-            return CreateActionResult(CustomResponseDTO<List<BorrowedBookDTO>>.Success(200,borrowedBooksDTO));
+            return CreateActionResult(CustomResponseModel<List<BookModel>>.Success(200,booksModel));
         }
 
         [HttpGet("finished")]
         public async Task<IActionResult> GetFinishedBooks()
         {
-            var finishedBooks = await _service.GetFinishedBooksAsync();
-            var finishedBooksDTO = _mapper.Map<List<FinishedBookDTO>>(finishedBooks);
+            var books = await _service.GetFinishedBooksAsync();
+            var booksModel = books.Select(book => _entityMapper.BookMapEntityToModel(book)).ToList();
 
-            return CreateActionResult(CustomResponseDTO<List<FinishedBookDTO>>.Success(200, finishedBooksDTO));
+            return CreateActionResult(CustomResponseModel<List<BookModel>>.Success(200, booksModel));
         }
 
         [HttpPost]
-        public async Task<IActionResult> Save(BookPostDTO bookDTO)
+        public async Task<IActionResult> Save(BookPostModel bookModel)
         {
-            var book = await _service.AddAsync(_mapper.Map<Book>(bookDTO));
+            var bookEntity = _entityMapper.BookMapPostModelToEntity(bookModel); //model to entity
 
-            var _bookDTO = _mapper.Map<BookDTO>(book);
+            var book = await _service.AddAsync(bookEntity);
 
-            return CreateActionResult(CustomResponseDTO<BookDTO>.Success(201, _bookDTO));
+            var _bookModel = _entityMapper.BookMapEntityToModel(book);
+
+            return CreateActionResult(CustomResponseModel<BookModel>.Success(200, _bookModel));
         }
 
         [HttpPut]
-        public async Task<IActionResult> Update(BookDTO bookDTO)
+        public async Task<IActionResult> Update(BookModel bookModel)
         {
-            await _service.UpdateAsync(_mapper.Map<Book>(bookDTO));
+            var bookEntity = await _service.GetByIdAsync(bookModel.Id);
+            
+            await _service.UpdateAsync(_entityMapper.BookMapPutModelToEntity(bookModel,bookEntity));
 
-            return CreateActionResult(CustomResponseDTO<NoContentDTO>.Success(204));
+            return CreateActionResult(CustomResponseModel<NoContentModel>.Success(204));
         }
 
         [HttpDelete]
@@ -80,9 +86,9 @@ namespace NLayer.API.Controllers
 
             await _service.RemoveAsync(book);
 
-            var bookDTO = _mapper.Map<BookDTO>(book);
+         
 
-            return CreateActionResult(CustomResponseDTO<NoContentDTO>.Success(204));
+            return CreateActionResult(CustomResponseModel<NoContentModel>.Success(204));
         }
     }
 }
