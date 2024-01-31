@@ -26,7 +26,7 @@ namespace NLayer.API.Middlewares
                     };
                     context.Response.StatusCode = statusCode;
 
-                    var response = CustomResponseDTO<NoContentDTO>.Fail(statusCode, exceptionFeature.Error.Message);
+                    var response = CustomResponseModel<NoContentModel>.Fail(statusCode, exceptionFeature.Error.Message);
 
                     await context.Response.WriteAsync(JsonSerializer.Serialize(response));
 
