@@ -13,9 +13,8 @@ public static class BookMapper
             Publisher = model.Publisher,
             Page = model.Page,
             HaveRead = model.HaveRead,
-            IsBorrowed = model.IsBorrowed,
             CategoryId = model.CategoryId,
-            UserId = model.UserId
+            OwnerId = model.OwnerId
            
         };
     }
@@ -26,10 +25,9 @@ public static class BookMapper
         entity.Author = model.Author ?? entity.Author;
         entity.Publisher = model.Publisher ?? entity.Publisher;
         entity.Page = model.Page;
-        entity.IsBorrowed = model.IsBorrowed;
         entity.HaveRead = model.HaveRead;
         entity.CategoryId = model.CategoryId;
-        entity.BorrowedUserId = model.BorrowedUserId;
+        
 
         return entity;
     }
@@ -45,10 +43,10 @@ public static class BookMapper
             PublishDate = book.PublishDate,
             Page = book.Page,
             HaveRead = book.HaveRead,
-            IsBorrowed = book.IsBorrowed,
+            IsBorrowed = book.IsBorrowed ?? false,
             CategoryId = book.CategoryId,
-            BorrowedUserId = book.BorrowedUserId,
-            UserId= book.UserId,
+            BorrowerId = book.BorrowerId ?? 0 ,
+            OwnerId= book.OwnerId,
             
         };
     }

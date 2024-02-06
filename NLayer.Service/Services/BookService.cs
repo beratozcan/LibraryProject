@@ -39,9 +39,14 @@ namespace NLayer.Service.Services
            return  await _repository.GetSoftRemovedAllAsync();
         }
 
-        public async Task ChangeOwner(int bookId, int latestOwnerId)
+        public async Task BorrowBookAsync(int bookId, int borrowerId)
         {
-            await _repository.ChangeOwner(bookId,latestOwnerId);
+            await _repository.BorrowBookAsync(bookId,borrowerId);
+        }
+
+        public async Task GiveBookToOwnerAsync(int bookId)
+        {
+            await _repository.GiveBookToOwnerAsync(bookId);
         }
     }
 }

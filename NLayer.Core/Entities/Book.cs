@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace NLayer.Core.Models
 {
@@ -11,7 +12,12 @@ namespace NLayer.Core.Models
         public DateTime PublishDate { get; set; }
         public int Page {  get; set; }
         public bool HaveRead { get; set; }
-        public bool IsBorrowed { get; set; }
+
+        [NotMapped]
+        public bool? IsBorrowed
+        { get { return BorrowerId != null; }
+          set { }
+        }
 
         [Required]
         public Category Category { get; set; }
@@ -23,9 +29,9 @@ namespace NLayer.Core.Models
         public User User { get; set; }
 
         [Required]
-        public int UserId { get; set; }
+        public int OwnerId { get; set; }
         
-        public int BorrowedUserId { get; set; }
+        public int? BorrowerId { get; set; }
 
         public bool IsRemoved { get; set; }
         

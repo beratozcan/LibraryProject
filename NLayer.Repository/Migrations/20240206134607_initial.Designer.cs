@@ -12,7 +12,7 @@ using NLayer.Repository;
 namespace NLayer.Repository.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20240206111418_initial")]
+    [Migration("20240206134607_initial")]
     partial class initial
     {
         /// <inheritdoc />
@@ -37,7 +37,7 @@ namespace NLayer.Repository.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("BorrowedUserId")
+                    b.Property<int?>("BorrowerId")
                         .HasColumnType("int");
 
                     b.Property<int>("CategoryId")
@@ -46,15 +46,15 @@ namespace NLayer.Repository.Migrations
                     b.Property<bool>("HaveRead")
                         .HasColumnType("bit");
 
-                    b.Property<bool>("IsBorrowed")
-                        .HasColumnType("bit");
-
                     b.Property<bool>("IsRemoved")
                         .HasColumnType("bit");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("OwnerId")
+                        .HasColumnType("int");
 
                     b.Property<int>("Page")
                         .HasColumnType("int");
@@ -66,14 +66,11 @@ namespace NLayer.Repository.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
 
                     b.HasIndex("CategoryId");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("OwnerId");
 
                     b.ToTable("Books", (string)null);
                 });
@@ -137,7 +134,7 @@ namespace NLayer.Repository.Migrations
 
                     b.HasOne("NLayer.Core.Models.User", "User")
                         .WithMany("Books")
-                        .HasForeignKey("UserId")
+                        .HasForeignKey("OwnerId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 

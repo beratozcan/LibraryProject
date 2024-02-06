@@ -26,7 +26,7 @@ namespace NLayer.Repository
             modelBuilder.Entity<Book>()
                 .HasOne(b => b.User)
                 .WithMany(u => u.Books)
-                .HasForeignKey(b => b.UserId)
+                .HasForeignKey(b => b.OwnerId)
                 .OnDelete(DeleteBehavior.Restrict);
 
 

@@ -59,10 +59,9 @@ namespace NLayer.Repository.Migrations
                     PublishDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     Page = table.Column<int>(type: "int", nullable: false),
                     HaveRead = table.Column<bool>(type: "bit", nullable: false),
-                    IsBorrowed = table.Column<bool>(type: "bit", nullable: false),
                     CategoryId = table.Column<int>(type: "int", nullable: false),
-                    UserId = table.Column<int>(type: "int", nullable: false),
-                    BorrowedUserId = table.Column<int>(type: "int", nullable: false),
+                    OwnerId = table.Column<int>(type: "int", nullable: false),
+                    BorrowerId = table.Column<int>(type: "int", nullable: true),
                     IsRemoved = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
@@ -75,8 +74,8 @@ namespace NLayer.Repository.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_Books_Users_UserId",
-                        column: x => x.UserId,
+                        name: "FK_Books_Users_OwnerId",
+                        column: x => x.OwnerId,
                         principalTable: "Users",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
@@ -88,9 +87,9 @@ namespace NLayer.Repository.Migrations
                 column: "CategoryId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Books_UserId",
+                name: "IX_Books_OwnerId",
                 table: "Books",
-                column: "UserId");
+                column: "OwnerId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Categories_UserId",

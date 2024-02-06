@@ -31,11 +31,9 @@ namespace NLayer.Core.DTOs
 
         [Required]
 
-        public int BorrowedUserId { get; set; }
+        public int BorrowerId { get; set; }
 
-        public int UserId { get; set; }
-
-        
+        public int OwnerId { get; set; }
 
         
     }
@@ -52,12 +50,11 @@ namespace NLayer.Core.DTOs
         public int Page { get; set; }
         [Required]
         public bool HaveRead { get; set; }
-        [Required]
-        public bool IsBorrowed { get; set; }
+       
         [Required]
         public int CategoryId { get; set; }
 
-        public int UserId { get; set; }
+        public int OwnerId { get; set; }
         
     }
 
@@ -80,20 +77,11 @@ namespace NLayer.Core.DTOs
         [Required]
         public bool HaveRead { get; set; }
 
-        [Required]
-        public bool IsBorrowed { get; set; }
 
         [Required]
         public int CategoryId { get; set; }
 
-        [Required]
-
-        public int BorrowedUserId { get; set; }
-
-      
-
-
-
+        
 
     }
 

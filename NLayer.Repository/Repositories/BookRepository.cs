@@ -12,7 +12,15 @@ namespace NLayer.Repository.Repositories
         } 
         public async Task<IEnumerable<Book>> GetBorrowedBooksAsync()
         {
-            return await _context.Set<Book>().Where(b =>b.IsBorrowed).ToListAsync();
+
+            var books = await _context.Books
+                .Where(b => !b.IsRemoved)
+                .ToListAsync();
+
+            var borrowedBooks = books.Where(b => b.IsBorrowed == true);
+
+
+            return borrowedBooks;
         }
 
         public async Task<IEnumerable<Book>> GetFinishedBooksAsync()
@@ -36,18 +44,35 @@ namespace NLayer.Repository.Repositories
             return await _context.Set<Book>().Where(b => !b.IsRemoved).ToListAsync();
         }
 
-        public async Task ChangeOwner(int bookId, int latestOwnerId)
+        public async Task BorrowBookAsync(int bookId, int borrowerId)
         {
             var bookEntity = await _context.Books.FindAsync(bookId);
             
             if(bookEntity != null) 
             {
-                bookEntity.UserId = latestOwnerId;
-                bookEntity.BorrowedUserId = latestOwnerId;
+                if(bookEntity.IsBorrowed == true)
+                {
+                    throw new InvalidOperationException("The book is already borrowed");
+                }
+                
+                bookEntity.BorrowerId = borrowerId;
                 bookEntity.IsBorrowed = true;
                 await _context.SaveChangesAsync();
             }
 
+        }
+
+        public async Task GiveBookToOwnerAsync(int bookId)
+        {
+            var bookEntity = await _context.Books.FindAsync(bookId);
+
+            if(bookEntity != null)
+            {
+                bookEntity.IsBorrowed = null;
+                bookEntity.BorrowerId = null;
+                await _context.SaveChangesAsync();
+
+            }
         }
     }
 }

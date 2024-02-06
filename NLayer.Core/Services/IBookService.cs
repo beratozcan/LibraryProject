@@ -11,7 +11,8 @@ namespace NLayer.Core.Services
 
         Task<IEnumerable<Book>> GetSoftRemovedAllAsync();
 
-        Task ChangeOwner(int bookId, int latestOwnerId);
+        Task BorrowBookAsync(int bookId, int borrowerId);
+        Task GiveBookToOwnerAsync(int bookId);
 
     }
 }

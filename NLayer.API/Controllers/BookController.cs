@@ -37,7 +37,7 @@ namespace NLayer.API.Controllers
         }
 
         [HttpGet("borrowed")]
-        public async Task<IActionResult> GetBorrowedBooks()
+        public async Task<IActionResult> GetBorrowedBooksAsync()
         {
             var books = await _service.GetBorrowedBooksAsync();
             var booksModel = BookMapper.ToViewModelList(books);
@@ -86,14 +86,22 @@ namespace NLayer.API.Controllers
             return CreateActionResult(CustomResponseModel<NoContentModel>.Success(204));
         }
 
-        [HttpPut("ChangeOwner")]
+        [HttpPut("BorrowBook")]
 
-        public async Task<IActionResult> ChangeOwner(int bookId, int latestOwnerId)
+        public async Task<IActionResult> BorrowBookAsync(int bookId, int borrowerId)
         {
-            await _service.ChangeOwner(bookId, latestOwnerId);
+            await _service.BorrowBookAsync(bookId, borrowerId);
             return CreateActionResult(CustomResponseModel<NoContentModel>.Success(204));
 
         }
-        
+
+        [HttpPut("GiveBookToOwner")]
+
+        public async Task<IActionResult> GiveBookToOwnerAsync(int bookId)
+        {
+
+            await _service.GiveBookToOwnerAsync(bookId);
+            return CreateActionResult(CustomResponseModel<NoContentModel>.Success(204));
+        }
     }
 }
