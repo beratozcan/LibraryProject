@@ -1,19 +1,20 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace NLayer.Core.DTOs
-{
-    public class UserModel
+namespace NLayer.Core.DTOs;
+
+    public class UserViewModel
     {
-      
         public int Id { get; set; }
-        [Required]
+
         public string UserName { get; set; } = null!;
-        [Required]
+
         public string Password { get; set; } = null!;
+        
+        public List<BookViewModel> Books { get; set; } = new List<BookViewModel>();
 
     }
 
-    public class UserPostModel
+    public class UserCreateModel
     {
         [Required]
         public string UserName { get; set; } = null!;
@@ -22,14 +23,13 @@ namespace NLayer.Core.DTOs
         public string Password { get; set; } = null!;
     }
 
-    public class UserPutModel
+    public class UserUpdateModel
     {
+        
 
-        public int Id { get; set; }
         [Required]
         public string UserName { get; set; } = null!;
+
         [Required]
         public string Password { get; set; } = null!;
-
     }
-}

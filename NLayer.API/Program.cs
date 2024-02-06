@@ -4,7 +4,8 @@ using NLayer.Core.Repositories;
 using NLayer.Core.Services;
 using NLayer.Repository;
 using NLayer.Repository.Repositories;
-using NLayer.Service.Mapping;
+using NLayer.Service.Mappers;
+
 using NLayer.Service.Services;
 using System.Reflection;
 
@@ -22,10 +23,15 @@ builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepositor
 builder.Services.AddScoped(typeof(IService<>), typeof(Service<>));
 builder.Services.AddScoped<IBookService, BookService>();
 builder.Services.AddScoped<IBookRepository, BookRepository>();
-builder.Services.AddScoped<EntityMapper>();
+builder.Services.AddScoped<ICategoryService, CategoryService>();
+builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
+
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IUserService, UserService>();
 
 
-builder.Services.AddAutoMapper(typeof(MapProfile));
+
+
 
 builder.Services.AddDbContext<AppDbContext>(x =>
 

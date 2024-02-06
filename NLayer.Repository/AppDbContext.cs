@@ -15,12 +15,25 @@ namespace NLayer.Repository
         public DbSet<Book> Books { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
+
+
+            modelBuilder.Entity<Category>()
+                .HasOne(c => c.User)
+                .WithMany(u => u.Category)
+                .HasForeignKey(c => c.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Book>()
-        .HasOne(b => b.Category)
-        .WithMany(c => c.Books)
-        .HasForeignKey(b => b.CategoryId);
+                .HasOne(b => b.User)
+                .WithMany(u => u.Books)
+                .HasForeignKey(b => b.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+
+            modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
+
+            modelBuilder.Entity<Book>().HasQueryFilter(b => !b.IsRemoved); ;
+            modelBuilder.Entity<Category>().HasQueryFilter(c => !c.IsRemoved);
 
             base.OnModelCreating(modelBuilder);
         }

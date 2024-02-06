@@ -2,9 +2,46 @@
 
 namespace NLayer.Core.DTOs
 {
-    public class BookModel
+    public class BookViewModel
     {
         public int Id { get; set; }
+
+        [Required]
+        public string Name { get; set; } = null!;
+
+        [Required]
+        public string Author { get; set; } = null!;
+
+        [Required]
+        public string Publisher { get; set; } = null!;
+
+        [Required]
+        public DateTime PublishDate { get; set; }
+
+        public int Page { get; set; }
+
+        [Required]
+        public bool HaveRead { get; set; }
+
+        [Required]
+        public bool IsBorrowed { get; set; }
+
+        [Required]
+        public int CategoryId { get; set; }
+
+        [Required]
+
+        public int BorrowedUserId { get; set; }
+
+        public int UserId { get; set; }
+
+        
+
+        
+    }
+
+    public class BookCreateModel
+    {
         [Required]
         public string Name { get; set; } = null!;
         [Required]
@@ -12,7 +49,6 @@ namespace NLayer.Core.DTOs
         [Required]
         public string Publisher { get; set; } = null!;
         [Required]
-        public DateTime PublishDate { get; set; }
         public int Page { get; set; }
         [Required]
         public bool HaveRead { get; set; }
@@ -20,68 +56,50 @@ namespace NLayer.Core.DTOs
         public bool IsBorrowed { get; set; }
         [Required]
         public int CategoryId { get; set; }
-        [Required]
+
         public int UserId { get; set; }
+        
     }
 
-    public class BookPostModel
+    public class BookUpdateModel
     {
         [Required]
         public string Name { get; set; } = null!;
+
         [Required]
         public string Author { get; set; } = null!;
+
         [Required]
         public string Publisher { get; set; } = null!;
+
         [Required]
+        public DateTime PublishDate { get; set; }
+
         public int Page { get; set; }
+
         [Required]
         public bool HaveRead { get; set; }
+
         [Required]
         public bool IsBorrowed { get; set; }
+
         [Required]
         public int CategoryId { get; set; }
+
         [Required]
-        public int UserId { get; set; }
+
+        public int BorrowedUserId { get; set; }
+
+      
+
+
+
+
     }
 
-    public class BorrowedBookModel
-    {
-        public int Id { get; set; }
-        [Required]
-        public string Name { get; set; } = null!;
-        [Required]
-        public string Author { get; set; } = null!;
-        [Required]
-        public string Publisher { get; set; } = null!;
-        public DateTime PublishDate { get; set; }
-        [Required]
-        public int Page { get; set; }
-        [Required]
-        public bool HaveRead { get; set; }
-        [Required]
-        public int CategoryId { get; set; }
-        [Required]
-        public int UserId { get; set; }
-    }
 
-    public class FinishedBookModel
-    {
-        public int Id { get; set; }
-        [Required]
-        public string Name { get; set; } = null!;
-        [Required]
-        public string Author { get; set; } = null!;
-        [Required]
-        public string Publisher { get; set; } = null!;
 
-        public DateTime PublishDate { get; set; }
-        [Required]
-        public int Page { get; set; }
-        [Required]
-        public bool IsBorrowed { get; set; }
-        [Required]
-        public int CategoryId { get; set; }
-        [Required]
-        public int UserId { get; set; }
-    }
 }
+
+    
+

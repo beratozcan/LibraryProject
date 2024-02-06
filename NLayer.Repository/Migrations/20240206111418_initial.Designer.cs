@@ -12,7 +12,7 @@ using NLayer.Repository;
 namespace NLayer.Repository.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20240125102136_initial")]
+    [Migration("20240206111418_initial")]
     partial class initial
     {
         /// <inheritdoc />
@@ -37,8 +37,20 @@ namespace NLayer.Repository.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("BorrowedUserId")
+                        .HasColumnType("int");
+
                     b.Property<int>("CategoryId")
                         .HasColumnType("int");
+
+                    b.Property<bool>("HaveRead")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsBorrowed")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsRemoved")
+                        .HasColumnType("bit");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -57,12 +69,6 @@ namespace NLayer.Repository.Migrations
                     b.Property<int>("UserId")
                         .HasColumnType("int");
 
-                    b.Property<bool>("haveRead")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("isBorrowed")
-                        .HasColumnType("bit");
-
                     b.HasKey("Id");
 
                     b.HasIndex("CategoryId");
@@ -80,11 +86,19 @@ namespace NLayer.Repository.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<bool>("IsRemoved")
+                        .HasColumnType("bit");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("Categories", (string)null);
                 });
@@ -96,6 +110,9 @@ namespace NLayer.Repository.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("IsRemoved")
+                        .HasColumnType("bit");
 
                     b.Property<string>("Password")
                         .IsRequired()
@@ -121,10 +138,21 @@ namespace NLayer.Repository.Migrations
                     b.HasOne("NLayer.Core.Models.User", "User")
                         .WithMany("Books")
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Category");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("NLayer.Core.Models.Category", b =>
+                {
+                    b.HasOne("NLayer.Core.Models.User", "User")
+                        .WithMany("Category")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.Navigation("User");
                 });
@@ -137,6 +165,8 @@ namespace NLayer.Repository.Migrations
             modelBuilder.Entity("NLayer.Core.Models.User", b =>
                 {
                     b.Navigation("Books");
+
+                    b.Navigation("Category");
                 });
 #pragma warning restore 612, 618
         }

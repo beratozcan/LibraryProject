@@ -1,9 +1,7 @@
-﻿
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using NLayer.Core.DTOs;
-using NLayer.Core.Models;
 using NLayer.Core.Services;
-using NLayer.Service.Mapping;
+using NLayer.Service.Mappers;
 
 namespace NLayer.API.Controllers
 {
@@ -12,22 +10,21 @@ namespace NLayer.API.Controllers
     public class CategoryController : CustomController
     {
         
-        private readonly IService<Category> _service;
-        private readonly EntityMapper _entityMapper;
-
-        public CategoryController(IService<Category> service, EntityMapper entityMapper)
+        private readonly ICategoryService _service;
+        
+        public CategoryController(ICategoryService service)
         {
-            _entityMapper = entityMapper;
+            
             _service = service;
         }
 
         [HttpGet]
         public async Task<IActionResult> All()
         {
-            var categories = await _service.GetAllAsync();
-            var categoriesModel = categories.Select(category => _entityMapper.CategoryMapEntityToModel(category)).ToList();
+            var categories = await _service.GetSoftRemovedAllAsync();
+            var categoriesModel = CategoryMapper.ToViewModelList(categories);
 
-            return CreateActionResult(CustomResponseModel<List<CategoryModel>>.Success(200, categoriesModel));
+            return CreateActionResult(CustomResponseModel<List<CategoryViewModel>>.Success(200, categoriesModel));
 
         }
 
@@ -35,28 +32,28 @@ namespace NLayer.API.Controllers
         public async Task<IActionResult> GetById(int id)
         {
             var category = await _service.GetByIdAsync(id);
-            var categoryModel = _entityMapper.CategoryMapEntityToModel(category);
+            var categoryModel = CategoryMapper.ToViewModel(category);
             
-            return CreateActionResult(CustomResponseModel<CategoryModel>.Success(200, categoryModel));  
+            return CreateActionResult(CustomResponseModel<CategoryViewModel>.Success(200, categoryModel));  
         }
 
         [HttpPost]
-        public async Task<IActionResult> Save(CategoryPostModel categoryModel)
+        public async Task<IActionResult> Save(CategoryCreateModel categoryModel)
         {
-            var category = await _service.AddAsync(_entityMapper.CategoryPostMapEntityToModel(categoryModel));
+            var category = await _service.AddAsync(CategoryMapper.ToEntity(categoryModel));
 
-            var _categoryModel = _entityMapper.CategoryMapEntityToModel(category);
+            var _categoryModel = CategoryMapper.ToViewModel(category);
 
-            return CreateActionResult(CustomResponseModel<CategoryModel>.Success(201,_categoryModel));
+            return CreateActionResult(CustomResponseModel<CategoryViewModel>.Success(201,_categoryModel));
         }
 
         [HttpPut]
-        public async Task<IActionResult> Update(CategoryModel categoryModel)
+        public async Task<IActionResult> Update(int id,CategoryUpdateModel categoryModel)
         {
 
-            var categoryEntity = await _service.GetByIdAsync(categoryModel.Id);
+            var categoryEntity = await _service.GetByIdAsync(id);
 
-            await _service.UpdateAsync(_entityMapper.CategoryPutMapEntityToModel(categoryModel, categoryEntity));
+            await _service.UpdateAsync(CategoryMapper.ToEntity(categoryModel, categoryEntity));
 
             return CreateActionResult(CustomResponseModel<NoContentModel>.Success(204));
         }
@@ -64,11 +61,21 @@ namespace NLayer.API.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
-            var category = await _service.GetByIdAsync(id);
+            
 
-            await _service.RemoveAsync(category);
+            await _service.SoftDeleteAsync(id);
 
             return CreateActionResult(CustomResponseModel<NoContentModel>.Success(204));
+        }
+
+        [HttpGet("GetCategoryWithBooks")]
+
+        public async Task<IActionResult> GetCategoryWithBooks()
+        {
+            var categoriesWithBooks = await _service.GetCategoryWithBooksAsync();
+            var categories = CategoryMapper.ToViewModelList(categoriesWithBooks);
+
+            return CreateActionResult(CustomResponseModel<List<CategoryViewModel>>.Success(200, categories));
         }
     }
 }

@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using NLayer.Core.DTOs;
-using NLayer.Core.Models;
 using NLayer.Core.Services;
-using NLayer.Service.Mapping;
+using NLayer.Service.Mappers;
+
 
 namespace NLayer.API.Controllers
 {
@@ -11,12 +11,11 @@ namespace NLayer.API.Controllers
     public class UserController : CustomController
     {
         
-        private readonly IService<User> _service;
-        private readonly EntityMapper _entityMapper;
+        private readonly IUserService _service;
 
-        public UserController(EntityMapper entityMapper, IService<User> service)
+        public UserController(IUserService service)
         {
-            _entityMapper = entityMapper;
+            
             _service = service;
         }
 
@@ -25,9 +24,9 @@ namespace NLayer.API.Controllers
         {
             var Users = await _service.GetAllAsync();
             
-            var usersModel = Users.Select(user => _entityMapper.UserMapEntitytoModel(user)).ToList();
+            var usersModel = UserMapper.ToViewModelList(Users);
 
-            return CreateActionResult(CustomResponseModel<List<UserModel>>.Success(200, usersModel));
+            return CreateActionResult(CustomResponseModel<List<UserViewModel>>.Success(200, usersModel));
         }
 
         [HttpGet("{id}")]
@@ -35,28 +34,28 @@ namespace NLayer.API.Controllers
         {
             var User = await _service.GetByIdAsync(id);
 
-            var userModel = _entityMapper.UserMapEntitytoModel(User);
+            var userModel = UserMapper.ToViewModel(User);
 
-            return CreateActionResult(CustomResponseModel<UserModel>.Success(201,userModel));
+            return CreateActionResult(CustomResponseModel<UserViewModel>.Success(201,userModel));
         }
 
         [HttpPost]
-        public async Task<IActionResult> Save(UserPostModel userModel)
+        public async Task<IActionResult> Save(UserCreateModel userModel)
         {
-            var userEntity = _entityMapper.UserMapModelToEntity(userModel);
-            _service.AddAsync(userEntity);
+            var userEntity = UserMapper.ToEntity(userModel);
+            await _service.AddAsync(userEntity);
 
-            var _userModel = _entityMapper.UserMapEntitytoModel(userEntity);
+            var userViewModel = UserMapper.ToViewModel(userEntity);
 
-            return CreateActionResult(CustomResponseModel<UserModel>.Success(201, _userModel));
+            return CreateActionResult(CustomResponseModel<UserViewModel>.Success(201, userViewModel));
         }
 
         [HttpPut]
-        public async Task<IActionResult> Update(UserPutModel userModel)
+        public async Task<IActionResult> Update(int id,UserUpdateModel userModel)
         {
-            var entity= await _service.GetByIdAsync(userModel.Id);
+            var entity= await _service.GetByIdAsync(id);
 
-            await _service.UpdateAsync(_entityMapper.UserPutMapEntityToModel(userModel, entity));
+            await _service.UpdateAsync(UserMapper.ToEntity(userModel, entity));
 
             return CreateActionResult(CustomResponseModel<NoContentModel>.Success(204));
         }
@@ -69,6 +68,16 @@ namespace NLayer.API.Controllers
             await _service.RemoveAsync(user);
             
             return CreateActionResult(CustomResponseModel<NoContentModel>.Success(204));
+        }
+
+        [HttpGet("GetUsersWithBooks")]
+
+        public async Task<IActionResult> GetUserWithBooks(int id)
+        {
+            var userWithBooks = await _service.GetUserWithBooks(id);
+            var userModel = UserMapper.ToViewModelList(userWithBooks);
+            return CreateActionResult(CustomResponseModel<List<UserViewModel>>.Success(200, userModel));
+
         }
     }
 }

@@ -1,8 +1,8 @@
-﻿using AutoMapper;
-using NLayer.Core;
+﻿using NLayer.Core;
 using NLayer.Core.Models;
 using NLayer.Core.Repositories;
 using NLayer.Core.Services;
+
 
 namespace NLayer.Service.Services
 {
@@ -10,12 +10,11 @@ namespace NLayer.Service.Services
     {
 
         private readonly IBookRepository _repository;
-        private readonly IMapper _mapper;
-
-        public BookService(IGenericRepository<Book> repository,IUnitOfWork unitOfWork,IMapper mapper, IBookRepository bookRepository)
+        
+        public BookService(IGenericRepository<Book> repository,IUnitOfWork unitOfWork, IBookRepository bookRepository)
             :base(repository,unitOfWork)
         {
-            _mapper = mapper;
+            
             _repository = bookRepository;
             
         }
@@ -28,6 +27,21 @@ namespace NLayer.Service.Services
         public async Task<IEnumerable<Book>> GetFinishedBooksAsync()
         {
             return await _repository.GetFinishedBooksAsync();
+        }
+
+        public async Task SoftDeleteAsync(int id)
+        {
+            await _repository.SoftDeleteAsync(id);
+        }
+
+        public async Task<IEnumerable<Book>> GetSoftRemovedAllAsync()
+        {
+           return  await _repository.GetSoftRemovedAllAsync();
+        }
+
+        public async Task ChangeOwner(int bookId, int latestOwnerId)
+        {
+            await _repository.ChangeOwner(bookId,latestOwnerId);
         }
     }
 }

@@ -4,7 +4,7 @@ namespace NLayer.Core.Models
 {
     public class User
     {
-        
+        [Key]
         public int Id { get; set; }
 
         [Required]
@@ -14,6 +14,11 @@ namespace NLayer.Core.Models
         public string Password { get; set; } = null!;
 
         [Required]
-        public List<Book> Books {  get; set; }
+        public List<Category> Category { get; set; }
+
+        [Required]
+        public List<Book> Books {get; set;}
+
+        public bool IsRemoved { get; set; }
     }
 }
