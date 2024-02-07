@@ -81,6 +81,33 @@ namespace NLayer.Repository.Migrations
                         onDelete: ReferentialAction.Restrict);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "BorrowingLogs",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    BookId = table.Column<int>(type: "int", nullable: false),
+                    BorrowerId = table.Column<int>(type: "int", nullable: false),
+                    BorrowDate = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_BorrowingLogs", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_BorrowingLogs_Books_BookId",
+                        column: x => x.BookId,
+                        principalTable: "Books",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_BorrowingLogs_Users_BorrowerId",
+                        column: x => x.BorrowerId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_Books_CategoryId",
                 table: "Books",
@@ -92,6 +119,16 @@ namespace NLayer.Repository.Migrations
                 column: "OwnerId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_BorrowingLogs_BookId",
+                table: "BorrowingLogs",
+                column: "BookId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_BorrowingLogs_BorrowerId",
+                table: "BorrowingLogs",
+                column: "BorrowerId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Categories_UserId",
                 table: "Categories",
                 column: "UserId");
@@ -100,6 +137,9 @@ namespace NLayer.Repository.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropTable(
+                name: "BorrowingLogs");
+
             migrationBuilder.DropTable(
                 name: "Books");
 

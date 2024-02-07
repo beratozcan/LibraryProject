@@ -1,4 +1,5 @@
 ﻿using NLayer.Core;
+using NLayer.Core.Entities;
 using NLayer.Core.Models;
 using NLayer.Core.Repositories;
 using NLayer.Core.Services;
@@ -48,5 +49,7 @@ namespace NLayer.Service.Services
         {
             await _repository.GiveBookToOwnerAsync(bookId);
         }
+
+        
     }
 }

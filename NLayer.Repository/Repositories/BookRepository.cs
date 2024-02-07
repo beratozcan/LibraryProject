@@ -1,20 +1,17 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using NLayer.Core.Entities;
 using NLayer.Core.Models;
 using NLayer.Core.Repositories;
 
 namespace NLayer.Repository.Repositories
 {
-    public class BookRepository : GenericRepository<Book>, IBookRepository
+    public class BookRepository(AppDbContext context, IBorrowedBooksLoggerRepository loggerRepository) : GenericRepository<Book>(context), IBookRepository
     {
-        public BookRepository(AppDbContext context): base(context) 
-        {
-                
-        } 
         public async Task<IEnumerable<Book>> GetBorrowedBooksAsync()
         {
 
-            var books = await _context.Books
-                .Where(b => !b.IsRemoved)
+            var books = await context.Books
+                
                 .ToListAsync();
 
             var borrowedBooks = books.Where(b => b.IsBorrowed == true);
@@ -25,28 +22,29 @@ namespace NLayer.Repository.Repositories
 
         public async Task<IEnumerable<Book>> GetFinishedBooksAsync()
         {
-            return await _context.Set<Book>().Where(b => b.HaveRead).ToListAsync();
+            return await context.Set<Book>().Where(b => b.HaveRead).ToListAsync();
         }
 
         public async Task SoftDeleteAsync(int id)
         {
-            var entityToDelete = await _context.Books.FindAsync(id);
+            var entityToDelete = await context.Books.FindAsync(id);
 
             if (entityToDelete != null)
             {
                 entityToDelete.IsRemoved = true;
-                await _context.SaveChangesAsync();
+                await context.SaveChangesAsync();
             }
         }
 
         public async Task<IEnumerable<Book>> GetSoftRemovedAllAsync()
         {
-            return await _context.Set<Book>().Where(b => !b.IsRemoved).ToListAsync();
+            return await context.Set<Book>().Where(b => !b.IsRemoved).ToListAsync();
         }
 
         public async Task BorrowBookAsync(int bookId, int borrowerId)
         {
-            var bookEntity = await _context.Books.FindAsync(bookId);
+            var bookEntity = await context.Books.FindAsync(bookId);
+
             
             if(bookEntity != null) 
             {
@@ -58,6 +56,8 @@ namespace NLayer.Repository.Repositories
                 bookEntity.BorrowerId = borrowerId;
                 bookEntity.IsBorrowed = true;
                 await _context.SaveChangesAsync();
+
+                await loggerRepository.LogBorrowedBookHistoryAsync(bookId, borrowerId);
             }
 
         }
@@ -74,5 +74,7 @@ namespace NLayer.Repository.Repositories
 
             }
         }
+
+        
     }
 }

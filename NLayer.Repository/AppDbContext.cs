@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using NLayer.Core.Entities;
 using NLayer.Core.Models;
 using System.Reflection;
 
@@ -13,9 +14,19 @@ namespace NLayer.Repository
         public DbSet<User> Users { get; set; }
         public DbSet<Category> Categories { get; set; }
         public DbSet<Book> Books { get; set; }
+        public DbSet<BookBorrowing> BorrowingLogs { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<BookBorrowing>()
+                .HasOne(b => b.Book)
+                .WithMany()
+                .HasForeignKey(b => b.BookId);
 
+            modelBuilder.Entity<BookBorrowing>()
+                .HasOne(b => b.Borrower)
+                .WithMany()
+                .HasForeignKey(b => b.BorrowerId);
 
             modelBuilder.Entity<Category>()
                 .HasOne(c => c.User)
@@ -34,6 +45,7 @@ namespace NLayer.Repository
 
             modelBuilder.Entity<Book>().HasQueryFilter(b => !b.IsRemoved); ;
             modelBuilder.Entity<Category>().HasQueryFilter(c => !c.IsRemoved);
+            modelBuilder.Entity<BookBorrowing>().HasQueryFilter(x => !x.Book.IsRemoved);
 
             base.OnModelCreating(modelBuilder);
         }

@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using NLayer.Core.Entities;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace NLayer.Core.Models
@@ -34,6 +35,8 @@ namespace NLayer.Core.Models
         public int? BorrowerId { get; set; }
 
         public bool IsRemoved { get; set; }
+
+        
         
     }
 }

@@ -1,4 +1,5 @@
-﻿using NLayer.Core.Models;
+﻿using NLayer.Core.Entities;
+using NLayer.Core.Models;
 
 namespace NLayer.Core.Services
 {
@@ -13,6 +14,8 @@ namespace NLayer.Core.Services
 
         Task BorrowBookAsync(int bookId, int borrowerId);
         Task GiveBookToOwnerAsync(int bookId);
+
+        
 
     }
 }
