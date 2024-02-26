@@ -4,7 +4,7 @@ namespace NLayer.Core.Services
 {
     public interface IService<T> where T : class
     {
-        Task<IEnumerable<T>> GetAllAsync();
+        Task<ICollection<T>> GetAllAsync();
         Task<T> GetByIdAsync(int id);
         IQueryable<T> WhereAsync(Expression<Func<T, bool>> predicate);
         Task<bool> AnyAsync(Expression<Func<T, bool>> predicate);

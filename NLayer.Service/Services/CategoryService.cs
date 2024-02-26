@@ -11,26 +11,13 @@ namespace NLayer.Service.Services
         private readonly ICategoryRepository _repository;
         
 
-        public CategoryService(IGenericRepository<Category> repository, IUnitOfWork unitOfWork, ICategoryRepository categoryRepository)
-            : base(repository, unitOfWork)
+        public CategoryService(IUnitOfWork unitOfWork, ICategoryRepository categoryRepository)
+            : base(categoryRepository, unitOfWork)
         {
             
             _repository = categoryRepository;
 
         }
-        public async Task<IEnumerable<Category>> GetCategoryWithBooksAsync()
-        {
-            return await _repository.GetCategoriesWithBooksAsync();
-        }
 
-        public async Task SoftDeleteAsync(int id)
-        {
-            await _repository.SoftDeleteAsync(id);
-        }
-
-        public async Task<IEnumerable<Category>> GetSoftRemovedAllAsync()
-        {
-            return await _repository.GetSoftRemovedAllAsync();
-        }
     }
 }

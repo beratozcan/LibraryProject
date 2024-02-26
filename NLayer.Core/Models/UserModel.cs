@@ -9,7 +9,7 @@ namespace NLayer.Core.DTOs;
         public string UserName { get; set; } = null!;
 
         public string Password { get; set; } = null!;
-        
+
         public List<BookViewModel> Books { get; set; } = new List<BookViewModel>();
 
     }

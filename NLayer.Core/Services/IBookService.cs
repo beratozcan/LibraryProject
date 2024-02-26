@@ -5,17 +5,17 @@ namespace NLayer.Core.Services
 {
     public interface IBookService : IService<Book>
     {
-        Task<IEnumerable<Book>> GetBorrowedBooksAsync();
-        Task<IEnumerable<Book>> GetFinishedBooksAsync();
-
-        Task SoftDeleteAsync(int id);
-
-        Task<IEnumerable<Book>> GetSoftRemovedAllAsync();
-
+        Task<ICollection<Book>> GetBooksByStatus(int status);
         Task BorrowBookAsync(int bookId, int borrowerId);
         Task GiveBookToOwnerAsync(int bookId);
 
+       // Task<ICollection<Book>> GetBooksAsync();
+        // Task Remove(int id);
+
+        Task AddBookToCategoryAsync(int bookId, int categoryId);
         
+
+
 
     }
 }

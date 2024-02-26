@@ -1,4 +1,5 @@
-﻿using NLayer.Core.Models;
+﻿
+using NLayer.Core.DTOs;
 using System.ComponentModel.DataAnnotations;
 
 namespace NLayer.Core.DTOs
@@ -6,14 +7,10 @@ namespace NLayer.Core.DTOs
     public class CategoryViewModel
     {
         public int Id { get; set; }
-        [Required]
-
+        
         public string Name { get; set; } = null!;
+      
 
-        [Required]
-        public int UserId { get; set; }
-
-        public List<BookViewModel> Books { get; set; } = new List<BookViewModel>();
     }
 
     public class CategoryCreateModel
@@ -21,9 +18,7 @@ namespace NLayer.Core.DTOs
         [Required]
         public string Name { get; set; } = null!;
 
-        [Required]
-
-        public int UserId { get; set; } 
+        
     }
 
     public class CategoryUpdateModel
@@ -31,4 +26,18 @@ namespace NLayer.Core.DTOs
         [Required]
         public string Name { get; set; } = null!;
     }
-}
+
+     
+    }
+
+    public class CategoryWithBooksViewModel
+    {
+        public int Id { get; set; }
+
+        public string Name { get; set; } = null!;
+        public List<BookViewModel> Books { get; set; } = [];
+
+    }
+
+
+

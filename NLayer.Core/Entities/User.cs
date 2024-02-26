@@ -1,8 +1,10 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using NLayer.Core.Entities;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace NLayer.Core.Models
 {
-    public class User
+    public class User : ISoftDeletable
     {
         [Key]
         public int Id { get; set; }
@@ -11,14 +13,21 @@ namespace NLayer.Core.Models
         public string UserName { get; set; } = null!;
 
         [Required]
-        public string Password { get; set; } = null!;
+        
+        public byte[] PasswordHash { get; set; } = null!;
 
         [Required]
-        public List<Category> Category { get; set; }
+        
+        public byte[] PasswordSalt { get; set; } = null!;
 
         [Required]
-        public List<Book> Books {get; set;}
 
-        public bool IsRemoved { get; set; }
+        public bool DidLogin { get; set; } 
+
+        public virtual ICollection<Book>? OwnedBooks {get; set;}
+
+        public virtual ICollection<Book>? BorrowedBooks { get; set; }
+
+        public bool IsDeleted { get; set; }
     }
 }

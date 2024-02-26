@@ -5,10 +5,12 @@ namespace NLayer.Core.Repositories
     public interface ICategoryRepository : IGenericRepository<Category>
     {
 
-        Task<IEnumerable<Category>> GetCategoriesWithBooksAsync();
 
-        Task SoftDeleteAsync(int id);
+      //  Task<ICollection<Category>> GetCategoriesAsync();
+       // Task Remove(int id);
 
-        Task<IEnumerable<Category>> GetSoftRemovedAllAsync();
+
+
+
     }
 }

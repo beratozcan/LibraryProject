@@ -12,7 +12,7 @@ using NLayer.Repository;
 namespace NLayer.Repository.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20240207090733_initial")]
+    [Migration("20240221131653_initial")]
     partial class initial
     {
         /// <inheritdoc />
@@ -20,7 +20,7 @@ namespace NLayer.Repository.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.1")
+                .HasAnnotation("ProductVersion", "8.0.2")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -42,6 +42,9 @@ namespace NLayer.Repository.Migrations
                     b.Property<int>("BorrowerId")
                         .HasColumnType("int");
 
+                    b.Property<DateTime?>("GiveBackTime")
+                        .HasColumnType("datetime2");
+
                     b.HasKey("Id");
 
                     b.HasIndex("BookId");
@@ -49,6 +52,66 @@ namespace NLayer.Repository.Migrations
                     b.HasIndex("BorrowerId");
 
                     b.ToTable("BorrowingLogs");
+                });
+
+            modelBuilder.Entity("NLayer.Core.Entities.BookCategory", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("BookId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("CategoryId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BookId");
+
+                    b.HasIndex("CategoryId");
+
+                    b.ToTable("BookCategories");
+                });
+
+            modelBuilder.Entity("NLayer.Core.Entities.BookStatus", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("BookStatuses");
+                });
+
+            modelBuilder.Entity("NLayer.Core.Entities.Genre", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Genres");
                 });
 
             modelBuilder.Entity("NLayer.Core.Models.Book", b =>
@@ -63,16 +126,16 @@ namespace NLayer.Repository.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("BookStatusId")
+                        .HasColumnType("int");
+
                     b.Property<int?>("BorrowerId")
                         .HasColumnType("int");
 
-                    b.Property<int>("CategoryId")
+                    b.Property<int>("GenreId")
                         .HasColumnType("int");
 
-                    b.Property<bool>("HaveRead")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsRemoved")
+                    b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
                     b.Property<string>("Name")
@@ -94,7 +157,11 @@ namespace NLayer.Repository.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CategoryId");
+                    b.HasIndex("BookStatusId");
+
+                    b.HasIndex("BorrowerId");
+
+                    b.HasIndex("GenreId");
 
                     b.HasIndex("OwnerId");
 
@@ -109,19 +176,14 @@ namespace NLayer.Repository.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<bool>("IsRemoved")
+                    b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
-
-                    b.HasIndex("UserId");
 
                     b.ToTable("Categories", (string)null);
                 });
@@ -134,12 +196,19 @@ namespace NLayer.Repository.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<bool>("IsRemoved")
+                    b.Property<bool>("DidLogin")
                         .HasColumnType("bit");
 
-                    b.Property<string>("Password")
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<byte[]>("PasswordHash")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("varbinary(max)");
+
+                    b.Property<byte[]>("PasswordSalt")
+                        .IsRequired()
+                        .HasColumnType("varbinary(max)");
 
                     b.Property<string>("UserName")
                         .IsRequired()
@@ -161,7 +230,7 @@ namespace NLayer.Repository.Migrations
                     b.HasOne("NLayer.Core.Models.User", "Borrower")
                         .WithMany()
                         .HasForeignKey("BorrowerId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Book");
@@ -169,46 +238,73 @@ namespace NLayer.Repository.Migrations
                     b.Navigation("Borrower");
                 });
 
-            modelBuilder.Entity("NLayer.Core.Models.Book", b =>
+            modelBuilder.Entity("NLayer.Core.Entities.BookCategory", b =>
                 {
+                    b.HasOne("NLayer.Core.Models.Book", "Book")
+                        .WithMany("BookCategories")
+                        .HasForeignKey("BookId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("NLayer.Core.Models.Category", "Category")
-                        .WithMany("Books")
+                        .WithMany("BookCategories")
                         .HasForeignKey("CategoryId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("NLayer.Core.Models.User", "User")
-                        .WithMany("Books")
-                        .HasForeignKey("OwnerId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                    b.Navigation("Book");
 
                     b.Navigation("Category");
-
-                    b.Navigation("User");
                 });
 
-            modelBuilder.Entity("NLayer.Core.Models.Category", b =>
+            modelBuilder.Entity("NLayer.Core.Models.Book", b =>
                 {
-                    b.HasOne("NLayer.Core.Models.User", "User")
-                        .WithMany("Category")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                    b.HasOne("NLayer.Core.Entities.BookStatus", "BookStatus")
+                        .WithMany()
+                        .HasForeignKey("BookStatusId")
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("User");
+                    b.HasOne("NLayer.Core.Models.User", "Borrower")
+                        .WithMany("BorrowedBooks")
+                        .HasForeignKey("BorrowerId");
+
+                    b.HasOne("NLayer.Core.Entities.Genre", "Genre")
+                        .WithMany()
+                        .HasForeignKey("GenreId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("NLayer.Core.Models.User", "Owner")
+                        .WithMany("OwnedBooks")
+                        .HasForeignKey("OwnerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("BookStatus");
+
+                    b.Navigation("Borrower");
+
+                    b.Navigation("Genre");
+
+                    b.Navigation("Owner");
+                });
+
+            modelBuilder.Entity("NLayer.Core.Models.Book", b =>
+                {
+                    b.Navigation("BookCategories");
                 });
 
             modelBuilder.Entity("NLayer.Core.Models.Category", b =>
                 {
-                    b.Navigation("Books");
+                    b.Navigation("BookCategories");
                 });
 
             modelBuilder.Entity("NLayer.Core.Models.User", b =>
                 {
-                    b.Navigation("Books");
+                    b.Navigation("BorrowedBooks");
 
-                    b.Navigation("Category");
+                    b.Navigation("OwnedBooks");
                 });
 #pragma warning restore 612, 618
         }

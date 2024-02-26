@@ -14,14 +14,19 @@ namespace NLayer.Service.Services
     {
         private readonly IBorrowedBooksLoggerRepository _repository;
 
-        public BorrowedBooksLoggerService(IGenericRepository<BookBorrowing> repository, IUnitOfWork unitOfWork, IBorrowedBooksLoggerRepository borrowedLogrepository)
-            :base(repository,unitOfWork)
+        public BorrowedBooksLoggerService( IUnitOfWork unitOfWork, IBorrowedBooksLoggerRepository borrowedLogrepository)
+            :base(borrowedLogrepository, unitOfWork)
         {
             _repository = borrowedLogrepository;
         }
         public async Task LogBorrowedBookHistoryAsync(int bookId, int borrowerId)
         {
             await _repository.LogBorrowedBookHistoryAsync(bookId,borrowerId);
+        }
+
+        public async Task LogGiveBackBookHistoryAsync(int bookId)
+        {
+            await _repository.LogGiveBackBookHistoryAsync(bookId);
         }
     }
 }

@@ -2,6 +2,7 @@
 using NLayer.Core.Models;
 using NLayer.Core.Repositories;
 using NLayer.Core.Services;
+using NLayer.Repository.Repositories;
 
 namespace NLayer.Service.Services
 {
@@ -10,15 +11,30 @@ namespace NLayer.Service.Services
 
         private readonly IUserRepository _repository;
 
-        public UserService(IGenericRepository<User> repository, IUnitOfWork unitOfWork, IUserRepository userRepository)
-            :base(repository, unitOfWork)
+        public UserService(IUnitOfWork unitOfWork, IUserRepository userRepository)
+            :base(userRepository, unitOfWork)
         {
             _repository = userRepository;
         }
 
-        public async Task<IEnumerable<User>> GetUserWithBooks(int id)
+        public Task<bool> AuthenticateUser(string username, string password)
         {
-            return await _repository.GetUserWithBooks(id);
+            return _repository.AuthenticateUser(username, password);
+        }
+
+        public void CreateUser(string username, string password)
+        {
+            _repository.CreateUser(username, password);
+        }
+
+        public bool DidUserLogin(int userId)
+        {
+            return _repository.DidUserLogin(userId);
+        }
+
+        public void UpdateUser(int id, string username, string password)
+        {
+            _repository.UpdateUser(id, username, password);
         }
     }
 }

@@ -1,22 +1,17 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using NLayer.Core.Entities;
+using System.ComponentModel.DataAnnotations;
 namespace NLayer.Core.Models
 {
-    public class Category
+    public class Category : ISoftDeletable
     {
         [Key]
         public int Id { get; set; }
-        [Required]
-        public string Name { get; set; }
 
         [Required]
-        public List<Book> Books { get; set; }
+        public string Name { get; set; } = null!;
 
-        [Required]
-        public User User { get; set; }
+        public bool IsDeleted { get; set; }
 
-        [Required]
-        public int UserId { get; set; }
-
-        public bool IsRemoved { get; set; }
+        public virtual ICollection<BookCategory> BookCategories { get; set; } = [];
     }
 }

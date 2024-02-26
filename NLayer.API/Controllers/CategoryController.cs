@@ -11,71 +11,102 @@ namespace NLayer.API.Controllers
     {
         
         private readonly ICategoryService _service;
+        private readonly IUserService _userService;
         
-        public CategoryController(ICategoryService service)
+        public CategoryController(ICategoryService service, IUserService userservice)
         {
             
             _service = service;
+            _userService = userservice;
         }
 
         [HttpGet]
-        public async Task<IActionResult> All()
+        public async Task<IActionResult> GetAll()
         {
-            var categories = await _service.GetSoftRemovedAllAsync();
-            var categoriesModel = CategoryMapper.ToViewModelList(categories);
 
-            return CreateActionResult(CustomResponseModel<List<CategoryViewModel>>.Success(200, categoriesModel));
+                var categories = await _service.GetAllAsync();
+                var categoriesModel = CategoryMapper.ToViewWithBooksModelList(categories);
 
+                return CreateActionResult(CustomResponseModel<List<CategoryWithBooksViewModel>>.Success(200, categoriesModel));
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetById(int id)
+        public async Task<IActionResult> GetById(int id, int getCategoryId)
         {
-            var category = await _service.GetByIdAsync(id);
-            var categoryModel = CategoryMapper.ToViewModel(category);
-            
-            return CreateActionResult(CustomResponseModel<CategoryViewModel>.Success(200, categoryModel));  
+
+            var didUserLogin = _userService.DidUserLogin(id);
+
+            if(didUserLogin)
+            {
+                var category = await _service.GetByIdAsync(getCategoryId);
+                var categoryModel = CategoryMapper.ToViewWithBooksModel(category);
+
+                return CreateActionResult(CustomResponseModel<CategoryWithBooksViewModel>.Success(200, categoryModel));
+            }
+            else
+            {
+                throw new Exception("Kullanici login degil");
+            }
         }
 
         [HttpPost]
-        public async Task<IActionResult> Save(CategoryCreateModel categoryModel)
+        public async Task<IActionResult> Create(CategoryCreateModel categoryModel, int id)
         {
-            var category = await _service.AddAsync(CategoryMapper.ToEntity(categoryModel));
+            var didUserLogin = _userService.DidUserLogin(id);
 
-            var _categoryModel = CategoryMapper.ToViewModel(category);
+            if(didUserLogin)
+            {
+                var category = await _service.AddAsync(CategoryMapper.ToEntity(categoryModel));
 
-            return CreateActionResult(CustomResponseModel<CategoryViewModel>.Success(201,_categoryModel));
+                var _categoryModel = CategoryMapper.ToViewModel(category);
+
+                return CreateActionResult(CustomResponseModel<CategoryViewModel>.Success(201, _categoryModel));
+            }
+            else
+            {
+                throw new Exception("Kullanici login degil");
+            }  
         }
 
         [HttpPut]
-        public async Task<IActionResult> Update(int id,CategoryUpdateModel categoryModel)
+        public async Task<IActionResult> Update(int id, CategoryUpdateModel categoryModel,int updatedCategoryId)
         {
+            var didUserLogin = _userService.DidUserLogin(id);
 
-            var categoryEntity = await _service.GetByIdAsync(id);
+            if(didUserLogin)
+            {
+                var categoryEntity = await _service.GetByIdAsync(updatedCategoryId);
 
-            await _service.UpdateAsync(CategoryMapper.ToEntity(categoryModel, categoryEntity));
+                await _service.UpdateAsync(CategoryMapper.ToEntity(categoryModel, categoryEntity));
 
-            return CreateActionResult(CustomResponseModel<NoContentModel>.Success(204));
+                return CreateActionResult(CustomResponseModel<NoContentModel>.Success(204));
+            }
+            else
+            {
+                throw new Exception("Kullanici login degil");
+            }    
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(int id)
+        public async Task<IActionResult> Delete(int id, int deletedCategoryId)
         {
+            var didUserLogin = _userService.DidUserLogin(id);
+
+            if (didUserLogin)
+            {
+                var entity = await _service.GetByIdAsync(deletedCategoryId);
+
+                await _service.RemoveAsync(entity);
+
+                return CreateActionResult(CustomResponseModel<NoContentModel>.Success(204));
+
+            }
+            else
+            {
+                throw new Exception("Kullanici login degil");
+            }
             
-
-            await _service.SoftDeleteAsync(id);
-
-            return CreateActionResult(CustomResponseModel<NoContentModel>.Success(204));
         }
 
-        [HttpGet("GetCategoryWithBooks")]
-
-        public async Task<IActionResult> GetCategoryWithBooks()
-        {
-            var categoriesWithBooks = await _service.GetCategoryWithBooksAsync();
-            var categories = CategoryMapper.ToViewModelList(categoriesWithBooks);
-
-            return CreateActionResult(CustomResponseModel<List<CategoryViewModel>>.Success(200, categories));
-        }
     }
 }

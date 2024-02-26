@@ -34,15 +34,15 @@ namespace NLayer.Service.Services
             return await _repository.AnyAsync(predicate);
         }
 
-        public async Task<IEnumerable<T>> GetAllAsync()
+        public async Task<ICollection<T>> GetAllAsync()
         {
             return await _repository.GetAllAsync();
         }
 
         public async Task<T> GetByIdAsync(int id)
         {
-            return await _repository.GetByIdAsync(id) 
-                ?? throw new NotFoundException($"{typeof(T).Name} ({id}) not found");
+            return await _repository.GetByIdAsync(id);
+                
         }
         public async Task RemoveAsync(T entity)
         {

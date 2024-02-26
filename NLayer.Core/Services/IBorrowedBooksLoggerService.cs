@@ -5,5 +5,6 @@ namespace NLayer.Core.Services
     public interface IBorrowedBooksLoggerService : IService<BookBorrowing>
     {
         Task LogBorrowedBookHistoryAsync(int bookId, int borrowerId);
+        Task LogGiveBackBookHistoryAsync(int bookId);
     }
 }

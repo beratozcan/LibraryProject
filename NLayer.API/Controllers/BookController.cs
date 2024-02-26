@@ -9,101 +9,196 @@ namespace NLayer.API.Controllers
     [ApiController]
     public class BookController : CustomController
     {
-        
+
         private readonly IBookService _service;
-        public BookController(IBookService bookService)
+        private readonly IUserService _userService;
+        public BookController(IBookService bookService, IUserService userService)
         {
-            
+
             _service = bookService;
-            
+            _userService = userService;
+
         }
 
         [HttpGet]
-        public async Task<IActionResult> All()
+        public async Task<IActionResult> GetAll()
         {
-            var books = await _service.GetSoftRemovedAllAsync();
-            var booksDTO = BookMapper.ToViewModelList(books);
-            return CreateActionResult(CustomResponseModel<List<BookViewModel>>.Success(200, booksDTO));
+  
+                var books = await _service.GetAllAsync();
+                var booksModel = BookMapper.ToViewWithCategoriesModelList(books);
+                return CreateActionResult(CustomResponseModel<List<BookViewWithCategoriesModel>>.Success(200, booksModel));
         }
 
         [HttpGet("{id}")]
 
-        public async Task<IActionResult> GetById(int id)
+        public async Task<IActionResult> GetById(int id, int getBookId)
         {
-            var book = await _service.GetByIdAsync(id);
-            var bookDTO = BookMapper.ToViewModel(book);
-            return CreateActionResult(CustomResponseModel<BookViewModel>.Success(200, bookDTO));
+            var didUserLogin = _userService.DidUserLogin(id);
+
+            if(didUserLogin)
+            {
+                var book = await _service.GetByIdAsync(getBookId);
+                var bookModel = BookMapper.ToViewWithCategoriesModel(book);
+                return CreateActionResult(CustomResponseModel<BookViewWithCategoriesModel>.Success(200, bookModel));
+
+            }
+            else
+            {
+                throw new Exception("Kullanici login degil");
+            }  
 
         }
 
-        [HttpGet("borrowed")]
-        public async Task<IActionResult> GetBorrowedBooksAsync()
-        {
-            var books = await _service.GetBorrowedBooksAsync();
-            var booksModel = BookMapper.ToViewModelList(books);
+        [HttpGet("GetBookByStatus")]
 
-            return CreateActionResult(CustomResponseModel<List<BookViewModel>>.Success(200,booksModel));
+        public async Task<IActionResult> GetBookByStatus(int statusId,int id)
+        {
+            var didUserLogin = _userService.DidUserLogin(id);
+
+            if(didUserLogin)
+            {
+                var books = await _service.GetBooksByStatus(statusId);
+
+                var booksModel = BookMapper.ToViewModelList(books);
+
+                return CreateActionResult(CustomResponseModel<List<BookViewModel>>.Success(200, booksModel));
+
+            }
+            else
+            {
+                throw new Exception("Kullanici login degil");
+            }       
         }
 
-        [HttpGet("finished")]
-        public async Task<IActionResult> GetFinishedBooks()
-        {
-            var books = await _service.GetFinishedBooksAsync();
-            var booksModel = BookMapper.ToViewModelList(books);
-
-            return CreateActionResult(CustomResponseModel<List<BookViewModel>>.Success(200, booksModel));
-        }
 
         [HttpPost]
-        public async Task<IActionResult> Save(BookCreateModel bookModel)
+        public async Task<IActionResult> Create(BookCreateModel bookModel, int id)
         {
-            var bookEntity = BookMapper.ToEntity(bookModel); //model to entity
+            var didUserLogin = _userService.DidUserLogin(id);
 
-            var book = await _service.AddAsync(bookEntity);
+            if(didUserLogin)
+            {
+                var bookEntity = BookMapper.ToEntity(bookModel);
 
-            var _bookModel = BookMapper.ToViewModel(book);
+                var book = await _service.AddAsync(bookEntity);
 
-            return CreateActionResult(CustomResponseModel<BookViewModel>.Success(200, _bookModel));
+                var _bookModel = BookMapper.ToViewModel(book);
+
+                return CreateActionResult(CustomResponseModel<BookViewModel>.Success(200, _bookModel));
+
+            }
+            else
+            {
+                throw new Exception("Kullanici login degil");
+            }
+
+            
         }
 
-        [HttpPut("{id:int}")]
-        public async Task<IActionResult> Update(int id,BookUpdateModel bookModel)
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Update(int id, BookUpdateModel bookModel, int updatedBookId)
         {
 
-            var bookEntity = await _service.GetByIdAsync(id);
-            
-            await _service.UpdateAsync(BookMapper.ToEntity(bookModel, bookEntity));
+            var didUserLogin = _userService.DidUserLogin(id);
 
-            return CreateActionResult(CustomResponseModel<NoContentModel>.Success(204));
+            if(didUserLogin)
+            {
+                var bookEntity = await _service.GetByIdAsync(updatedBookId);
+
+                await _service.UpdateAsync(BookMapper.ToEntity(bookModel, bookEntity));
+
+                return CreateActionResult(CustomResponseModel<NoContentModel>.Success(204));
+
+            }
+            else
+            {
+                throw new Exception("Kullanici login degil");
+            }
+
+            
         }
 
         [HttpDelete]
-        public async Task<IActionResult> Remove(int id)
+        public async Task<IActionResult> Remove(int id, int deletedBookId)
         {
-            await _service.SoftDeleteAsync(id);
+            var didUserLogin = _userService.DidUserLogin(id);
 
-           
-            return CreateActionResult(CustomResponseModel<NoContentModel>.Success(204));
+            if (didUserLogin)
+            {
+                var entity = await _service.GetByIdAsync(deletedBookId);
+
+                await _service.RemoveAsync(entity);
+
+                return CreateActionResult(CustomResponseModel<NoContentModel>.Success(204));
+
+            }
+            else
+            {
+                throw new Exception("Kullanici login degil");
+            }
+
+            
         }
 
         [HttpPut("BorrowBook")]
 
-        public async Task<IActionResult> BorrowBookAsync(int bookId, int borrowerId)
+        public async Task<IActionResult> BorrowBookAsync(int bookId, int borrowerId,int userId)
         {
-            await _service.BorrowBookAsync(bookId, borrowerId);
-            return CreateActionResult(CustomResponseModel<NoContentModel>.Success(204));
+            var didUserLogin = _userService.DidUserLogin(userId);
+
+            if(didUserLogin)
+            {
+                await _service.BorrowBookAsync(bookId, borrowerId);
+                return CreateActionResult(CustomResponseModel<NoContentModel>.Success(204));
+
+            }
+            else
+            {
+                throw new Exception("Kullanici login degil");
+            }
+
+           
 
         }
 
         [HttpPut("GiveBookToOwner")]
 
-        public async Task<IActionResult> GiveBookToOwnerAsync(int bookId)
+        public async Task<IActionResult> GiveBookToOwnerAsync(int bookId, int userId)
         {
+            var didUserLogin = _userService.DidUserLogin(userId);
 
-            await _service.GiveBookToOwnerAsync(bookId);
-            return CreateActionResult(CustomResponseModel<NoContentModel>.Success(204));
+            if(didUserLogin)
+            {
+                await _service.GiveBookToOwnerAsync(bookId);
+                return CreateActionResult(CustomResponseModel<NoContentModel>.Success(204));
+
+            }
+            else
+            {
+                throw new Exception("Kullanici login degil");
+            }
+
+            
         }
 
-        
+        [HttpPut("AddBookToCategory")]
+
+        public async Task<IActionResult> AddBookToCategory(int bookId, int categoryId,int userId)
+        {
+            var didUserLogin = _userService.DidUserLogin(userId);
+
+            if (didUserLogin)
+            {
+                await _service.AddBookToCategoryAsync(bookId, categoryId);
+                return CreateActionResult(CustomResponseModel<NoContentModel>.Success(204));
+
+            }
+            else
+            {
+                throw new Exception("Kullanici login degil");
+            }
+            
+        }
     }
+    
 }

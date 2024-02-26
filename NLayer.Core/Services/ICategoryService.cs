@@ -4,10 +4,10 @@ namespace NLayer.Core.Services
 {
     public interface ICategoryService : IService<Category>
     {
-        Task<IEnumerable<Category>> GetCategoryWithBooksAsync();
+        // Task<ICollection<Category>> GetCategoriesAsync();
+       // Task Remove(int id);
 
-        Task SoftDeleteAsync(int id);
+        
 
-        Task<IEnumerable<Category>> GetSoftRemovedAllAsync();
     }
 }

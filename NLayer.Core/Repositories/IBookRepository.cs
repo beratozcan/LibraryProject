@@ -1,24 +1,19 @@
-﻿using NLayer.Core.Entities;
-using NLayer.Core.Models;
+﻿using NLayer.Core.Models;
 
 namespace NLayer.Core.Repositories
 {
     public interface IBookRepository :IGenericRepository<Book>
     {
-        Task<IEnumerable<Book>> GetBorrowedBooksAsync();
-        Task<IEnumerable<Book>> GetFinishedBooksAsync();
-
-        Task SoftDeleteAsync(int id);
-
-        Task<IEnumerable<Book>> GetSoftRemovedAllAsync();
-
+        Task<ICollection<Book>> GetBooksByStatus(int status);
         Task BorrowBookAsync(int bookId, int borrowerId);
         Task GiveBookToOwnerAsync(int bookId);
 
-        
+        // Task<ICollection<Book>> GetBooksAsync();
+       // Task Remove(int id);
+
+        Task AddBookToCategoryAsync(int bookId, int categoryId);
 
         
-
 
 
     }

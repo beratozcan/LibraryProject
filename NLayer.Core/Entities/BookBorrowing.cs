@@ -1,5 +1,7 @@
-﻿using NLayer.Core.Models;
+﻿using Microsoft.EntityFrameworkCore;
+using NLayer.Core.Models;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace NLayer.Core.Entities
 {
@@ -9,22 +11,22 @@ namespace NLayer.Core.Entities
         public int Id { get; set; }
 
         [Required]
-        public Book Book { get; set; }
-
-        [Required]
         public int BookId { get; set; }
 
         [Required]
-
-        public User Borrower { get; set; }
-
-        [Required]
-
         public int BorrowerId { get;set; }
 
-        [Required]
+        public DateTime BorrowDate { get; set; }
 
-        public DateTime BorrowDate { get; set; } 
+        public DateTime? GiveBackTime { get; set; }
+
+        [ForeignKey("BookId")]
+        public virtual Book Book { get; set; } = null!;
+
+        [ForeignKey("BorrowerId")]
+        
+        [DeleteBehavior(DeleteBehavior.Restrict)] 
+        public virtual User Borrower { get; set; } = null!;
 
     }
 }

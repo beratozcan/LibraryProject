@@ -1,80 +1,125 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using NLayer.Core;
 using NLayer.Core.Entities;
 using NLayer.Core.Models;
 using NLayer.Core.Repositories;
 
+
 namespace NLayer.Repository.Repositories
 {
-    public class BookRepository(AppDbContext context, IBorrowedBooksLoggerRepository loggerRepository) : GenericRepository<Book>(context), IBookRepository
+    public class BookRepository : GenericRepository<Book>, IBookRepository
     {
-        public async Task<IEnumerable<Book>> GetBorrowedBooksAsync()
+        IBorrowedBooksLoggerRepository _loggerRepository;
+        
+
+        public BookRepository(AppDbContext context, IBorrowedBooksLoggerRepository loggerRepository) : base(context) 
         {
-
-            var books = await context.Books
-                
-                .ToListAsync();
-
-            var borrowedBooks = books.Where(b => b.IsBorrowed == true);
-
-
-            return borrowedBooks;
-        }
-
-        public async Task<IEnumerable<Book>> GetFinishedBooksAsync()
-        {
-            return await context.Set<Book>().Where(b => b.HaveRead).ToListAsync();
-        }
-
-        public async Task SoftDeleteAsync(int id)
-        {
-            var entityToDelete = await context.Books.FindAsync(id);
-
-            if (entityToDelete != null)
-            {
-                entityToDelete.IsRemoved = true;
-                await context.SaveChangesAsync();
-            }
-        }
-
-        public async Task<IEnumerable<Book>> GetSoftRemovedAllAsync()
-        {
-            return await context.Set<Book>().Where(b => !b.IsRemoved).ToListAsync();
+            _loggerRepository = loggerRepository;
+            
         }
 
         public async Task BorrowBookAsync(int bookId, int borrowerId)
         {
-            var bookEntity = await context.Books.FindAsync(bookId);
+            var bookEntity = await _context.Books.FindAsync(bookId);
 
-            
-            if(bookEntity != null) 
+            if (bookEntity!.BookStatusId != GlobalConstants.didBorrow && bookEntity.BookStatusId == GlobalConstants.canBorrow)
             {
-                if(bookEntity.IsBorrowed == true)
-                {
-                    throw new InvalidOperationException("The book is already borrowed");
-                }
-                
                 bookEntity.BorrowerId = borrowerId;
-                bookEntity.IsBorrowed = true;
+                bookEntity.BookStatusId = 3;
                 await _context.SaveChangesAsync();
-
-                await loggerRepository.LogBorrowedBookHistoryAsync(bookId, borrowerId);
+                await _loggerRepository.LogBorrowedBookHistoryAsync(bookId, borrowerId);
             }
-
+            else
+            {
+                throw new Exception("Kitap odunc almaya musait degil");
+            }
         }
+        
 
+        public async Task<ICollection<Book>> GetBooksByStatus(int status)
+        {
+            var books = await _context.Books.Where(b=> b.BookStatusId == status).ToListAsync();
+            return books;
+        }
+        
         public async Task GiveBookToOwnerAsync(int bookId)
         {
             var bookEntity = await _context.Books.FindAsync(bookId);
 
-            if(bookEntity != null)
+            if(bookEntity !=null && bookEntity.BookStatusId == GlobalConstants.didBorrow )
             {
-                bookEntity.IsBorrowed = null;
-                bookEntity.BorrowerId = null;
-                await _context.SaveChangesAsync();
-
+                bookEntity.Borrower = null;
+                bookEntity.BookStatusId = GlobalConstants.canBorrow;
             }
+
+            await _loggerRepository.LogGiveBackBookHistoryAsync(bookId);
         }
 
-        
-    }
+        public async Task AddBookToCategoryAsync(int bookId, int categoryId)
+        {
+            var entity = new BookCategory { BookId = bookId, CategoryId = categoryId };
+
+            await _context.BookCategories.AddAsync(entity);
+
+            await _context.SaveChangesAsync();
+
+        }
+
+        public override async Task<ICollection<Book>> GetAllAsync()
+        {
+            return await _context.Books.Select(b => new Book
+            {
+                Id = b.Id,
+                Name = b.Name,
+                Author = b.Author,
+                Publisher = b.Publisher,
+                PublishDate = b.PublishDate,
+                Page = b.Page,
+                GenreId = b.GenreId,
+                OwnerId = b.OwnerId,
+                BorrowerId = b.BorrowerId,
+                BookStatusId = b.BookStatusId,
+                BookCategories = b.BookCategories.Select(bc => new BookCategory
+                {
+                    Category = new Category
+                    {
+                        Id = bc.Category.Id,
+                        Name = bc.Category.Name
+                    }
+                }).ToList(),
+
+            }).ToListAsync();
+        }
+
+        public override async Task<Book> GetByIdAsync(int id)
+        {
+            return await _context.Books
+                .Where(b => b.Id == id)
+                .Select(b => new Book
+                {
+                    Id = b.Id,
+                    Name = b.Name,
+                    Author = b.Author,
+                    Publisher = b.Publisher,
+                    PublishDate = b.PublishDate,
+                    Page = b.Page,
+                    GenreId = b.GenreId,
+                    BorrowerId = b.BorrowerId,
+                    BookStatusId = b.BookStatusId,
+                    OwnerId = b.OwnerId,
+                    
+                    BookCategories = b.BookCategories.Select(bc => new BookCategory
+                    {
+                        Category = new Category
+                        {
+                            Id = bc.Category.Id,
+                            Name = bc.Category.Name
+                        }
+                    }).ToList(),
+                })
+                .FirstOrDefaultAsync();
+        }
+    }  
+    
 }
+

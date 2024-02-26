@@ -11,25 +11,26 @@ public static class UserMapper
         return new User
         {
             UserName = model.UserName,
-            Password = model.Password
+            //Password = model.Password
         };
     }
 
     public static UserViewModel ToViewModel(User user)
     {
+        
         return new UserViewModel
         {
             Id = user.Id,
             UserName = user.UserName,
-            Password = user.Password,
-            Books = user.Books == null ? new List<BookViewModel>() : BookMapper.ToViewModelList(user.Books)
+            Password = BitConverter.ToString(user.PasswordHash).Replace("-",""),
+           Books = user.OwnedBooks == null ? new List<BookViewModel>() : BookMapper.ToViewModelList(user.OwnedBooks)
         };
     }
 
     public static User ToEntity(UserUpdateModel model, User entity)
     {
         entity.UserName = model.UserName;
-        entity.Password = model.Password;
+        //entity.Password = model.Password;
 
         return entity;
     }

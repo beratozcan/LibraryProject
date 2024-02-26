@@ -23,6 +23,18 @@ namespace NLayer.Repository.Repositories
             await _context.SaveChangesAsync();
         }
 
-        
+        public async Task LogGiveBackBookHistoryAsync(int bookId)
+        {
+            
+            var bookEntity = _context.BorrowingLogs
+                                     .SingleOrDefault(b =>  b.BookId == bookId);
+
+            if(bookEntity != null)
+            {
+                bookEntity.GiveBackTime = DateTime.Now;
+            }
+            await _context.SaveChangesAsync();
+
+        }
     }
 }

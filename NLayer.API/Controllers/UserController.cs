@@ -10,74 +10,130 @@ namespace NLayer.API.Controllers
     [ApiController]
     public class UserController : CustomController
     {
-        
+
         private readonly IUserService _service;
 
         public UserController(IUserService service)
         {
-            
+
             _service = service;
         }
 
         [HttpGet]
-        public async Task<IActionResult> All()
-        {
-            var Users = await _service.GetAllAsync();
-            
-            var usersModel = UserMapper.ToViewModelList(Users);
 
-            return CreateActionResult(CustomResponseModel<List<UserViewModel>>.Success(200, usersModel));
+        public async Task<IActionResult> GetAll()
+        {
+            
+                var users = await _service.GetAllAsync();
+                var usersModel = UserMapper.ToViewModelList(users);
+
+                return CreateActionResult(CustomResponseModel<List<UserViewModel>>.Success(200, usersModel));
+
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetById(int id)
+
+        public async Task<IActionResult> GetById(int getUserId,int id)
         {
-            var User = await _service.GetByIdAsync(id);
+            var didUserLogin = _service.DidUserLogin(id);
 
-            var userModel = UserMapper.ToViewModel(User);
+            if(didUserLogin && id == getUserId)
+            {
+                var user = await _service.GetByIdAsync(getUserId);
+                var userModel = UserMapper.ToViewModel(user);
 
-            return CreateActionResult(CustomResponseModel<UserViewModel>.Success(201,userModel));
+                return CreateActionResult(CustomResponseModel<UserViewModel>.Success(200, userModel));
+
+            }
+            else if (didUserLogin && id !=getUserId)
+            {
+                throw new Exception("Kullanici bu yetkiye sahip degil");
+            }
+            else
+            {
+                throw new Exception("Kullanici login degil");
+            } 
         }
 
         [HttpPost]
-        public async Task<IActionResult> Save(UserCreateModel userModel)
+
+        public async Task<IActionResult> Create(UserCreateModel model, int id)
         {
-            var userEntity = UserMapper.ToEntity(userModel);
-            await _service.AddAsync(userEntity);
+            var didUserLogin = _service.DidUserLogin(id);
 
-            var userViewModel = UserMapper.ToViewModel(userEntity);
+            if(didUserLogin)
+            {
+                string username = model.UserName;
+                string password = model.Password;
 
-            return CreateActionResult(CustomResponseModel<UserViewModel>.Success(201, userViewModel));
-        }
+                _service.CreateUser(username, password);
 
-        [HttpPut]
-        public async Task<IActionResult> Update(int id,UserUpdateModel userModel)
+                return CreateActionResult(CustomResponseModel<NoContentModel>.Success(204));
+
+            }
+            else
+            {
+                throw new Exception("Kullanici login degil");
+            }
+
+        } 
+
+       [HttpPut]
+
+        public async Task<IActionResult> Update(int updatedUserId, UserUpdateModel model, int id)
         {
-            var entity= await _service.GetByIdAsync(id);
-
-            await _service.UpdateAsync(UserMapper.ToEntity(userModel, entity));
-
-            return CreateActionResult(CustomResponseModel<NoContentModel>.Success(204));
-        }
+            var didUserLogin = _service.DidUserLogin(id);
+            if(didUserLogin && updatedUserId == id)
+            {
+                _service.UpdateUser(updatedUserId, model.UserName, model.Password);
+                return CreateActionResult(CustomResponseModel<NoContentModel>.Success(204));
+            }
+            else if(didUserLogin && updatedUserId!=id)
+            {
+                throw new Exception("Kullanici bu yetkiye sahip degil");
+            }
+            else
+            {
+                throw new Exception("Kullanici login degil");
+            }
+            
+        } 
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> Remove(int id)
-        {
-            var user = await _service.GetByIdAsync(id);
 
-            await _service.RemoveAsync(user);
-            
-            return CreateActionResult(CustomResponseModel<NoContentModel>.Success(204));
+        public async Task<IActionResult> Remove(int deletedUserId,int id)
+        {
+            var didUserLogin = _service.DidUserLogin(id);
+
+            if(didUserLogin && deletedUserId == id)
+            {
+                var entity = await _service.GetByIdAsync(deletedUserId);
+                await _service.RemoveAsync(entity);
+                return CreateActionResult(CustomResponseModel<NoContentModel>.Success(204));
+            }
+            else if(didUserLogin && deletedUserId!=id)
+            {
+                throw new Exception("Kullanici bu yetkiye sahip degil");
+            }
+            else
+            {
+                throw new Exception("Kullanici login degil");
+            }
         }
 
-        [HttpGet("GetUsersWithBooks")]
+        [HttpPut("UserAuthentication")]
 
-        public async Task<IActionResult> GetUserWithBooks(int id)
+        public async Task<IActionResult> Login(string username,string password)
         {
-            var userWithBooks = await _service.GetUserWithBooks(id);
-            var userModel = UserMapper.ToViewModelList(userWithBooks);
-            return CreateActionResult(CustomResponseModel<List<UserViewModel>>.Success(200, userModel));
+            if(await _service.AuthenticateUser(username, password))
+            {
+                return CreateActionResult(CustomResponseModel<NoContentModel>.Success(204));
 
-        }
+            }
+            else
+            {
+                throw new Exception("Giris basarili degil");
+            }
+        }   
     }
 }

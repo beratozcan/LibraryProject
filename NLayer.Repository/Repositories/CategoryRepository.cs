@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using NLayer.Core.Entities;
 using NLayer.Core.Models;
 using NLayer.Core.Repositories;
 
@@ -6,34 +7,53 @@ namespace NLayer.Repository.Repositories
 {
     public class CategoryRepository : GenericRepository<Category>, ICategoryRepository
     {
-
+        
         public CategoryRepository(AppDbContext context) : base(context)
         {
+            
+
 
         }
-        public async Task<IEnumerable<Category>> GetCategoriesWithBooksAsync()
+
+        public override async Task<ICollection<Category>> GetAllAsync()
         {
-            var categoriesWithBooks = await _context.Categories
-            .Include(category => category.Books)  
-            .ToListAsync();
-
-            return categoriesWithBooks;
+            return await _context.Categories
+                .Select(c => new Category
+                {
+                    Id = c.Id,
+                    Name = c.Name,
+                    BookCategories = c.BookCategories.Select(bc => new BookCategory
+                    {
+                        Book = new Book
+                        {
+                            Id = bc.Book.Id,
+                            Name = bc.Book.Name
+                        }
+                    }).ToList(),
+                })
+                
+                .ToListAsync();
         }
 
-        public async Task SoftDeleteAsync(int id)
+        public override async Task<Category> GetByIdAsync(int id)
         {
-            var entityToDelete = await _context.Categories.FindAsync(id);
-
-            if (entityToDelete != null)
-            {
-                entityToDelete.IsRemoved = true;
-                await _context.SaveChangesAsync();
-            }
+            return await _context.Categories
+                .Where(c => c.Id == id)
+                .Select(c => new Category
+                {
+                    Id = c.Id,
+                    Name = c.Name,
+                    BookCategories = c.BookCategories.Select(bc => new BookCategory
+                    {
+                        Book = new Book
+                        {
+                            Id = bc.Book.Id,
+                            Name = bc.Book.Name
+                        }
+                    }).ToList(),
+                })
+                .FirstOrDefaultAsync();
         }
 
-        public async Task<IEnumerable<Category>> GetSoftRemovedAllAsync()
-        {
-            return await _context.Set<Category>().Where(b => !b.IsRemoved).ToListAsync();
-        }
     }
 }
