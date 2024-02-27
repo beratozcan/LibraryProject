@@ -1,8 +1,11 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage.Json;
 using NLayer.Core.Entities;
 using NLayer.Core.Models;
 using NLayer.Core.Repositories;
+using NLayer.Service.Exceptions;
 using System.Linq.Expressions;
+
 
 namespace NLayer.Repository.Repositories
 {
@@ -39,8 +42,17 @@ namespace NLayer.Repository.Repositories
 
         public virtual async Task<T> GetByIdAsync(int id)
         {
+            
+            var entity = await _dbSet.FindAsync(id);
 
-            return await _dbSet.FindAsync(id) ??  throw new Exception($"{nameof(T)} not found!");
+            if (entity != null)
+            {
+                return entity;
+            }
+            else
+            {
+                throw new NotFoundException($"{typeof(T).Name} not found with ID: {id}");
+            }
         }
 
         public async void Remove(T entity)

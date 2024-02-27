@@ -13,6 +13,8 @@ namespace NLayer.Core.Repositories
 
         Task AddBookToCategoryAsync(int bookId, int categoryId);
 
+        public bool DoesUserHaveBook(int userId, int bookId);
+
         
 
 

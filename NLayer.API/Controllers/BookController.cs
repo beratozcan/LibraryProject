@@ -31,21 +31,21 @@ namespace NLayer.API.Controllers
 
         [HttpGet("{id}")]
 
-        public async Task<IActionResult> GetById(int id, int getBookId)
+        public async Task<IActionResult> GetById(int id)
         {
-            var didUserLogin = _userService.DidUserLogin(id);
 
-            if(didUserLogin)
+            try
             {
-                var book = await _service.GetByIdAsync(getBookId);
+                var book = await _service.GetByIdAsync(id);
                 var bookModel = BookMapper.ToViewWithCategoriesModel(book);
                 return CreateActionResult(CustomResponseModel<BookViewWithCategoriesModel>.Success(200, bookModel));
-
             }
-            else
+            catch (Exception ex)
             {
-                throw new Exception("Kullanici login degil");
-            }  
+                return NotFound(ex.Message);
+            }
+            
+             
 
         }
 
@@ -98,23 +98,26 @@ namespace NLayer.API.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(int id, BookUpdateModel bookModel, int updatedBookId)
         {
-
+            var doesUserHaveBook = _service.DoesUserHaveBook(id, updatedBookId);
             var didUserLogin = _userService.DidUserLogin(id);
 
-            if(didUserLogin)
+            if(didUserLogin && doesUserHaveBook)
             {
                 var bookEntity = await _service.GetByIdAsync(updatedBookId);
 
                 await _service.UpdateAsync(BookMapper.ToEntity(bookModel, bookEntity));
 
                 return CreateActionResult(CustomResponseModel<NoContentModel>.Success(204));
+            }
+            else if(!doesUserHaveBook)
+            {
+                throw new Exception("Kullanici bu kitaba sahip degil");
 
             }
             else
             {
                 throw new Exception("Kullanici login degil");
             }
-
             
         }
 
@@ -122,8 +125,9 @@ namespace NLayer.API.Controllers
         public async Task<IActionResult> Remove(int id, int deletedBookId)
         {
             var didUserLogin = _userService.DidUserLogin(id);
+            var doesUserHaveBook = _service.DoesUserHaveBook(id, deletedBookId);
 
-            if (didUserLogin)
+            if (didUserLogin && doesUserHaveBook)
             {
                 var entity = await _service.GetByIdAsync(deletedBookId);
 
@@ -131,6 +135,10 @@ namespace NLayer.API.Controllers
 
                 return CreateActionResult(CustomResponseModel<NoContentModel>.Success(204));
 
+            }
+            else if(!doesUserHaveBook)
+            {
+                throw new Exception("Kullanici bu kitaba sahip degil");
             }
             else
             {
@@ -185,13 +193,18 @@ namespace NLayer.API.Controllers
 
         public async Task<IActionResult> AddBookToCategory(int bookId, int categoryId,int userId)
         {
+            var doesUserHaveBook = _service.DoesUserHaveBook(userId,bookId);
             var didUserLogin = _userService.DidUserLogin(userId);
 
-            if (didUserLogin)
+            if (didUserLogin && doesUserHaveBook)
             {
                 await _service.AddBookToCategoryAsync(bookId, categoryId);
                 return CreateActionResult(CustomResponseModel<NoContentModel>.Success(204));
 
+            }
+            else if (!doesUserHaveBook)
+            {
+                throw new Exception("Kullanici bu kitaba sahip degil");
             }
             else
             {

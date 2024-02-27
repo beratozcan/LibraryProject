@@ -3,6 +3,7 @@ using NLayer.Core;
 using NLayer.Core.Entities;
 using NLayer.Core.Models;
 using NLayer.Core.Repositories;
+using NLayer.Service.Exceptions;
 
 
 namespace NLayer.Repository.Repositories
@@ -93,7 +94,7 @@ namespace NLayer.Repository.Repositories
 
         public override async Task<Book> GetByIdAsync(int id)
         {
-            return await _context.Books
+            var entity = await _context.Books
                 .Where(b => b.Id == id)
                 .Select(b => new Book
                 {
@@ -118,6 +119,36 @@ namespace NLayer.Repository.Repositories
                     }).ToList(),
                 })
                 .FirstOrDefaultAsync();
+
+            if(entity != null)
+            {
+                return entity;
+            }
+            else
+            {
+                throw new NotFoundException($"Book not found with ID: {id}");
+            }
+        }
+
+        public bool DoesUserHaveBook(int userId, int bookId)
+        {
+            var bookEntity = _context.Books.FirstOrDefault(b =>  b.Id == bookId);
+
+            if (bookEntity == null)
+            {
+                return false;
+            }
+
+            var userEntity = _context.Users.Include(u => u.OwnedBooks)
+                                            .FirstOrDefault(u => u.Id == userId);
+            if (userEntity == null)
+            {
+                return false;
+            }
+
+            bool DoesUserHaveBook = userEntity.OwnedBooks.Any(book => book.Id == bookId);
+
+            return DoesUserHaveBook;
         }
     }  
     

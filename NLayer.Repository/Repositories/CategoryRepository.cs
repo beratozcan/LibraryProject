@@ -2,6 +2,7 @@
 using NLayer.Core.Entities;
 using NLayer.Core.Models;
 using NLayer.Core.Repositories;
+using NLayer.Service.Exceptions;
 
 namespace NLayer.Repository.Repositories
 {
@@ -14,6 +15,8 @@ namespace NLayer.Repository.Repositories
 
 
         }
+
+        
 
         public override async Task<ICollection<Category>> GetAllAsync()
         {
@@ -37,7 +40,7 @@ namespace NLayer.Repository.Repositories
 
         public override async Task<Category> GetByIdAsync(int id)
         {
-            return await _context.Categories
+            var entity = await _context.Categories
                 .Where(c => c.Id == id)
                 .Select(c => new Category
                 {
@@ -53,7 +56,17 @@ namespace NLayer.Repository.Repositories
                     }).ToList(),
                 })
                 .FirstOrDefaultAsync();
+
+            if (entity != null)
+            {
+                return entity;
+            }
+            else
+            {
+                throw new NotFoundException($"Category not found with ID: {id}");
+            }
         }
 
+        
     }
 }

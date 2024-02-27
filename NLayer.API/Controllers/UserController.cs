@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using NLayer.Core.DTOs;
 using NLayer.Core.Services;
 using NLayer.Service.Mappers;
@@ -6,6 +7,7 @@ using NLayer.Service.Mappers;
 
 namespace NLayer.API.Controllers
 {
+    
     [Route("api/[controller]")]
     [ApiController]
     public class UserController : CustomController
@@ -33,48 +35,33 @@ namespace NLayer.API.Controllers
 
         [HttpGet("{id}")]
 
-        public async Task<IActionResult> GetById(int getUserId,int id)
+        public async Task<IActionResult> GetById(int id)
         {
-            var didUserLogin = _service.DidUserLogin(id);
-
-            if(didUserLogin && id == getUserId)
+            try
             {
-                var user = await _service.GetByIdAsync(getUserId);
+                var user = await _service.GetByIdAsync(id);
                 var userModel = UserMapper.ToViewModel(user);
-
                 return CreateActionResult(CustomResponseModel<UserViewModel>.Success(200, userModel));
+            }
+            catch (Exception ex)
+            {
+                
+                return NotFound(ex.Message); 
+            }
 
-            }
-            else if (didUserLogin && id !=getUserId)
-            {
-                throw new Exception("Kullanici bu yetkiye sahip degil");
-            }
-            else
-            {
-                throw new Exception("Kullanici login degil");
-            } 
         }
 
         [HttpPost]
 
-        public async Task<IActionResult> Create(UserCreateModel model, int id)
+        public async Task<IActionResult> Create(UserCreateModel model)
         {
-            var didUserLogin = _service.DidUserLogin(id);
-
-            if(didUserLogin)
-            {
+          
                 string username = model.UserName;
                 string password = model.Password;
 
                 _service.CreateUser(username, password);
 
                 return CreateActionResult(CustomResponseModel<NoContentModel>.Success(204));
-
-            }
-            else
-            {
-                throw new Exception("Kullanici login degil");
-            }
 
         } 
 

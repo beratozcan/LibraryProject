@@ -30,20 +30,22 @@ namespace NLayer.API.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetById(int id, int userId)
+        public async Task<IActionResult> GetById(int id)
         {
-            var didUserLogin = _userService.DidUserLogin(userId);
-            if(didUserLogin)
+            try
             {
                 var genre = await _service.GetByIdAsync(id);
                 var genreModel = GenreMapper.ToViewModel(genre);
 
                 return CreateActionResult(CustomResponseModel<GenreViewModel>.Success(200, genreModel));
+
             }
-            else
+            catch (Exception ex)
             {
-                throw new Exception("User login degil");
+                return NotFound(ex.Message);
             }
+
+            
         }
 
         [HttpPost]

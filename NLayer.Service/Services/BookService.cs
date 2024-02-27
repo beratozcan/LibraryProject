@@ -28,6 +28,13 @@ namespace NLayer.Service.Services
             await _repository.BorrowBookAsync(bookId, borrowerId);
         }
 
+        
+
+        public bool DoesUserHaveBook(int userId, int bookId)
+        {
+            return _repository.DoesUserHaveBook(userId, bookId);
+        }
+
         public async Task<ICollection<Book>> GetBooksByStatus(int status)
         {
             return await _repository.GetBooksByStatus(status);

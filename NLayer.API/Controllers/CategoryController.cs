@@ -31,22 +31,21 @@ namespace NLayer.API.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetById(int id, int getCategoryId)
+        public async Task<IActionResult> GetById( int id)
         {
-
-            var didUserLogin = _userService.DidUserLogin(id);
-
-            if(didUserLogin)
+            try
             {
-                var category = await _service.GetByIdAsync(getCategoryId);
+                var category = await _service.GetByIdAsync(id);
                 var categoryModel = CategoryMapper.ToViewWithBooksModel(category);
 
                 return CreateActionResult(CustomResponseModel<CategoryWithBooksViewModel>.Success(200, categoryModel));
             }
-            else
+            catch (Exception ex)
             {
-                throw new Exception("Kullanici login degil");
+                return NotFound(ex.Message);
             }
+
+            
         }
 
         [HttpPost]
@@ -72,8 +71,9 @@ namespace NLayer.API.Controllers
         public async Task<IActionResult> Update(int id, CategoryUpdateModel categoryModel,int updatedCategoryId)
         {
             var didUserLogin = _userService.DidUserLogin(id);
+            
 
-            if(didUserLogin)
+            if(didUserLogin )
             {
                 var categoryEntity = await _service.GetByIdAsync(updatedCategoryId);
 
@@ -81,6 +81,7 @@ namespace NLayer.API.Controllers
 
                 return CreateActionResult(CustomResponseModel<NoContentModel>.Success(204));
             }
+           
             else
             {
                 throw new Exception("Kullanici login degil");
@@ -91,6 +92,7 @@ namespace NLayer.API.Controllers
         public async Task<IActionResult> Delete(int id, int deletedCategoryId)
         {
             var didUserLogin = _userService.DidUserLogin(id);
+            
 
             if (didUserLogin)
             {

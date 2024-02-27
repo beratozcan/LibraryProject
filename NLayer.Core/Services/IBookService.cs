@@ -13,7 +13,9 @@ namespace NLayer.Core.Services
         // Task Remove(int id);
 
         Task AddBookToCategoryAsync(int bookId, int categoryId);
-        
+
+        public bool DoesUserHaveBook(int userId, int bookId);
+
 
 
 

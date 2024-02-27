@@ -36,6 +36,11 @@ namespace NLayer.Repository.Repositories
 
         public void CreateUser(string username, string password)
         {
+            if(_context.Users.Any(u => u.UserName == username))
+            {
+                throw new Exception("Bu username zaten kayitli");
+            }
+
             byte[] salt = PasswordHasher.GenerateSalt();
             byte[] hashedPassword = PasswordHasher.HashPassword(password, salt);
 
@@ -61,11 +66,6 @@ namespace NLayer.Repository.Repositories
 
             return userEntity.DidLogin;
         }
-
-        /* public Task<ICollection<User>> GetUserWithBooksAsync(int id)
-         {
-             throw new NotImplementedException();
-         } */
 
 
 
