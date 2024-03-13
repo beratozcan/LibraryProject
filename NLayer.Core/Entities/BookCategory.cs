@@ -1,7 +1,6 @@
 ﻿using NLayer.Core.Models;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-
 namespace NLayer.Core.Entities
 {
     public class BookCategory

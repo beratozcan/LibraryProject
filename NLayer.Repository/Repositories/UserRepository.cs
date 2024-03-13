@@ -2,36 +2,15 @@
 using NLayer.Core.Entities;
 using NLayer.Core.Models;
 using NLayer.Core.Repositories;
-using System.Net.NetworkInformation;
 
 namespace NLayer.Repository.Repositories
 {
     public class UserRepository : GenericRepository<User>, IUserRepository
     {
+        
         public UserRepository(AppDbContext context) : base(context) 
         {        
         
-        }
-
-        public async Task<bool> AuthenticateUser(string username, string password)
-        {
-            var user = await _context.Users.SingleOrDefaultAsync(u => u.UserName == username);
-            if (user == null)
-            {
-                return false;
-                
-            }
-
-            if (PasswordHasher.VerifyPassword(password, user.PasswordSalt, user.PasswordHash))
-            {
-                user.DidLogin = true;
-                await _context.SaveChangesAsync();
-                return true;
-            }
-            else
-            {
-                return false;
-            }
         }
 
         public void CreateUser(string username, string password)
@@ -55,51 +34,65 @@ namespace NLayer.Repository.Repositories
             _context.SaveChanges();
         }
 
-        public bool DidUserLogin(int userId)
+        public override async Task<ICollection<User>> GetAllAsync(string token)
         {
-            var userEntity = _context.Users.SingleOrDefault(u => u.Id == userId);
+            var userTokenEntity = _context.UserTokens.FirstOrDefault(u => u.Token == token);
 
-            if (userEntity == null)
-            {
-                throw new Exception("Kullanici bulunamadi");
-            }
-
-            return userEntity.DidLogin;
-        }
-
-
-
-        public override async Task<ICollection<User>> GetAllAsync()
-        {
-            
             var usersWithBooks = await _context.Users
-                                    .Include(user => user.OwnedBooks)
-                                    .ToListAsync();
+                .Include(user => user.OwnedBooks)
+                 .Where(user => user.Id == userTokenEntity.UserId)
+                .ToListAsync();
+
             return usersWithBooks;
         }
 
+        public int GetAuthenticatedUserId(string token)
+        {
+            var userTokenEntity = _context.UserTokens.FirstOrDefault(u => u.Token == token);
+
+            return userTokenEntity.UserId;
+        }
+
+        public void RemoveUser(int id,string token)
+        {
+            var userTokenEntity = _context.UserTokens.FirstOrDefault(u => u.Token == token && u.UserId == id)
+                                                     ?? throw new UnauthorizedAccessException("Buna izniniz yok");
+
+            var userEntity = _context.Users.FirstOrDefault(u => u.Id == userTokenEntity.UserId);
+
+            userEntity.IsDeleted = true;
+              _context.SaveChanges();
+            
+        }
         public void UpdateUser(int id,string username, string password)
         {
-            var user = _context.Users.SingleOrDefault(u => u.Id == id);
+            var userEntity = _context.Users.FirstOrDefault(u => u.Id == id) ?? throw new UnauthorizedAccessException("Bu islem icin izniniz yok");
 
             byte[] salt = PasswordHasher.GenerateSalt();
             byte[] hashedPassword = PasswordHasher.HashPassword(password, salt);
 
-            if(user == null)
-            {
-                throw new Exception("Kullanici bulunamadi");
-            }
-            
-            user.PasswordHash = hashedPassword;
-            user.PasswordSalt = salt;
-            user.UserName = username;
+            userEntity.PasswordHash = hashedPassword;
+            userEntity.PasswordSalt = salt;
+            userEntity.UserName = username;
 
             _context.SaveChanges();
-
-
-
         }
 
+        public override async Task<User> GetByIdAsync(int id, string token)
+        {
+            var userTokenEntity = _context.UserTokens.FirstOrDefault(u => u.Token == token);
+
+            if (userTokenEntity == null || userTokenEntity.UserId != id)
+            {
+                throw new UnauthorizedAccessException("Bu kullaniciyi goruntulemeye izniniz yok");
+            }
+
+            var userWithBooks = await _context.Users
+                .Include(user => user.OwnedBooks)
+                .FirstOrDefaultAsync(user => user.Id == id);
+
+            return userWithBooks;
+        }
 
     }
 }

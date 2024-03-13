@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Diagnostics;
 using NLayer.Core.DTOs;
+using NLayer.Repository.Exceptions;
 using NLayer.Service.Exceptions;
 using System.Text.Json;
 
@@ -11,7 +12,6 @@ namespace NLayer.API.Middlewares
         {
             app.UseExceptionHandler(config =>
             {
-
                 config.Run(async context =>
                 {
                     context.Response.ContentType = "application/json";
@@ -22,7 +22,8 @@ namespace NLayer.API.Middlewares
                     {
                         ClientSideException => 400,
                         NotFoundException => 404,
-                        _ => 500
+                        BusinessExceptions => 401,
+                        _ => 500,
                     };
                     context.Response.StatusCode = statusCode;
 
@@ -31,9 +32,7 @@ namespace NLayer.API.Middlewares
                     await context.Response.WriteAsync(JsonSerializer.Serialize(response));
 
                 });
-
             });
-
         }
     }
 }

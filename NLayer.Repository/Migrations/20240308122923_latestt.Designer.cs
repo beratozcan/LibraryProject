@@ -12,8 +12,8 @@ using NLayer.Repository;
 namespace NLayer.Repository.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20240221131653_initial")]
-    partial class initial
+    [Migration("20240308122923_latestt")]
+    partial class latestt
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -114,6 +114,69 @@ namespace NLayer.Repository.Migrations
                     b.ToTable("Genres");
                 });
 
+            modelBuilder.Entity("NLayer.Core.Entities.UserRefreshToken", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime?>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("RevokedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Token")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("UserRefreshTokens");
+                });
+
+            modelBuilder.Entity("NLayer.Core.Entities.UserToken", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("ExpiredAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("RefreshToken")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("RevokedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("RevokedWith")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Token")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("UserTokens");
+                });
+
             modelBuilder.Entity("NLayer.Core.Models.Book", b =>
                 {
                     b.Property<int>("Id")
@@ -183,7 +246,12 @@ namespace NLayer.Repository.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("Categories", (string)null);
                 });
@@ -195,9 +263,6 @@ namespace NLayer.Repository.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<bool>("DidLogin")
-                        .HasColumnType("bit");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
@@ -257,6 +322,28 @@ namespace NLayer.Repository.Migrations
                     b.Navigation("Category");
                 });
 
+            modelBuilder.Entity("NLayer.Core.Entities.UserRefreshToken", b =>
+                {
+                    b.HasOne("NLayer.Core.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("NLayer.Core.Entities.UserToken", b =>
+                {
+                    b.HasOne("NLayer.Core.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("NLayer.Core.Models.Book", b =>
                 {
                     b.HasOne("NLayer.Core.Entities.BookStatus", "BookStatus")
@@ -290,6 +377,17 @@ namespace NLayer.Repository.Migrations
                     b.Navigation("Owner");
                 });
 
+            modelBuilder.Entity("NLayer.Core.Models.Category", b =>
+                {
+                    b.HasOne("NLayer.Core.Models.User", "User")
+                        .WithMany("Categories")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("NLayer.Core.Models.Book", b =>
                 {
                     b.Navigation("BookCategories");
@@ -303,6 +401,8 @@ namespace NLayer.Repository.Migrations
             modelBuilder.Entity("NLayer.Core.Models.User", b =>
                 {
                     b.Navigation("BorrowedBooks");
+
+                    b.Navigation("Categories");
 
                     b.Navigation("OwnedBooks");
                 });

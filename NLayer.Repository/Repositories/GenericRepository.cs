@@ -1,11 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Storage.Json;
 using NLayer.Core.Entities;
-using NLayer.Core.Models;
 using NLayer.Core.Repositories;
 using NLayer.Service.Exceptions;
 using System.Linq.Expressions;
-
 
 namespace NLayer.Repository.Repositories
 {
@@ -13,13 +10,13 @@ namespace NLayer.Repository.Repositories
     {
         protected readonly AppDbContext _context;
         private readonly DbSet<T> _dbSet;
+        private readonly IUserTokenRepository _userTokenRepository;
 
         public GenericRepository(AppDbContext context)
         {
             _context = context;
             _dbSet = _context.Set<T>();
         }
-
         public async Task AddAsync(T entity)
         {
             await _dbSet.AddAsync(entity);
@@ -35,18 +32,19 @@ namespace NLayer.Repository.Repositories
             throw new NotImplementedException();
         }
 
-        public virtual async Task<ICollection<T>> GetAllAsync()
-        {
-            return await _dbSet.ToListAsync();
-        }
-
-        public virtual async Task<T> GetByIdAsync(int id)
+        public virtual async Task<ICollection<T>> GetAllAsync(string token)
         {
             
+            return await _context.Set<T>().ToListAsync();
+        }
+
+        public virtual async Task<T> GetByIdAsync(int id, string token)
+        {
             var entity = await _dbSet.FindAsync(id);
 
             if (entity != null)
             {
+                
                 return entity;
             }
             else
@@ -55,7 +53,7 @@ namespace NLayer.Repository.Repositories
             }
         }
 
-        public async void Remove(T entity)
+        public virtual  void Remove(T entity)
         {
             if (entity == null)
             {
@@ -66,7 +64,6 @@ namespace NLayer.Repository.Repositories
             {
                 softDeletableEntity.IsDeleted = true;
             }
-
         }
 
         public void RemoveRange(IEnumerable<T> entities)
@@ -76,6 +73,7 @@ namespace NLayer.Repository.Repositories
 
         public void Update(T entity)
         {
+            
             _dbSet.Update(entity);
         }
 

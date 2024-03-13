@@ -9,6 +9,7 @@ using NLayer.Repository;
 using NLayer.Service.Services;
 using System.Text;
 using System.Reflection;
+using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 var config = builder.Configuration;
@@ -18,20 +19,54 @@ builder.Services.AddControllers();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(c =>
+{
+    var securityScheme = new OpenApiSecurityScheme
+    {
+        Description = "Example",
+        Name = "Authorization",
+        In = ParameterLocation.Header,
+        Scheme = "Bearer",
+        Type = SecuritySchemeType.Http,
+        Reference = new OpenApiReference
+        {
+            Type = ReferenceType.SecurityScheme,
+            Id = "Bearer"
+        }
+    };
 
-builder.Services.AddScoped<IUnitOfWork, NLayer.Repository.UnitOfWork>();
+    c.AddSecurityDefinition("Bearer", securityScheme);
+    var securityRequirement = new OpenApiSecurityRequirement {
+        {
+            securityScheme, new [] {"Bearer"}
+        }
+    };
+
+    c.AddSecurityRequirement(securityRequirement);
+});
+
+builder.Services.AddScoped<IUnitOfWork,UnitOfWork>();
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 builder.Services.AddScoped(typeof(IService<>), typeof(Service<>));
+
+builder.Services.AddScoped<IUserTokenService, UserTokenService>();
+builder.Services.AddScoped<IUserTokenRepository, UserTokenRepository>();
+
 builder.Services.AddScoped<IBorrowedBooksLoggerService, BorrowedBooksLoggerService>();
 builder.Services.AddScoped<IBorrowedBooksLoggerRepository, BorrowedBooksLoggerRepository>();
+
 builder.Services.AddScoped<IBookService, BookService>();
 builder.Services.AddScoped<IBookRepository, BookRepository>();
+
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 
+builder.Services.AddScoped<IAuthenticateRepository, AuthenticateRepository>();
+builder.Services.AddScoped<IAuthenticateService, AuthenticateService>();
+
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
+
 builder.Services.AddScoped<IGenreService, GenreService>();
 builder.Services.AddScoped<IGenreRepository, GenreRepository>();
 
@@ -72,5 +107,4 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
-
 app.Run();

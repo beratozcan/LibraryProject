@@ -1,20 +1,18 @@
-﻿using NLayer.Core.Entities;
-using NLayer.Core.Models;
+﻿using NLayer.Core.Models;
 
 namespace NLayer.Core.Services
 {
     public interface IBookService : IService<Book>
     {
-        Task<ICollection<Book>> GetBooksByStatus(int status);
-        Task BorrowBookAsync(int bookId, int borrowerId);
-        Task GiveBookToOwnerAsync(int bookId);
+        Task<ICollection<Book>> GetBooksByStatus(int status, string token);
+        Task BorrowBookAsync(int bookId,string token);
+        Task GiveBookToOwnerAsync(int bookId, string token);
+        Task AddBookToCategoryAsync(int bookId, int categoryId, string token);
+        Task RemoveBorrowedBookAsync(int bookId, string token);
+        Task AddBookToBorrowedBooksAsync(int bookId, string token);
+        Task RemoveBookFromCategoryAsync(int bookId, int categoryId, string token);
 
-       // Task<ICollection<Book>> GetBooksAsync();
-        // Task Remove(int id);
 
-        Task AddBookToCategoryAsync(int bookId, int categoryId);
-
-        public bool DoesUserHaveBook(int userId, int bookId);
 
 
 

@@ -2,11 +2,6 @@
 using NLayer.Core.Entities;
 using NLayer.Core.Repositories;
 using NLayer.Core.Services;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace NLayer.Service.Services
 {
@@ -23,7 +18,6 @@ namespace NLayer.Service.Services
         {
             await _repository.LogBorrowedBookHistoryAsync(bookId,borrowerId);
         }
-
         public async Task LogGiveBackBookHistoryAsync(int bookId)
         {
             await _repository.LogGiveBackBookHistoryAsync(bookId);

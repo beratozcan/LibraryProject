@@ -1,6 +1,5 @@
 ﻿using NLayer.Core.Entities;
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace NLayer.Core.Models
 {
@@ -20,9 +19,7 @@ namespace NLayer.Core.Models
         
         public byte[] PasswordSalt { get; set; } = null!;
 
-        [Required]
-
-        public bool DidLogin { get; set; } 
+        public virtual ICollection<Category>? Categories { get; set; }
 
         public virtual ICollection<Book>? OwnedBooks {get; set;}
 

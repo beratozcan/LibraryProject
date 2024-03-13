@@ -2,7 +2,6 @@
 using NLayer.Core.Models;
 using NLayer.Core.Repositories;
 using NLayer.Core.Services;
-using NLayer.Repository.Repositories;
 
 namespace NLayer.Service.Services
 {
@@ -17,19 +16,19 @@ namespace NLayer.Service.Services
             _repository = userRepository;
         }
 
-        public Task<bool> AuthenticateUser(string username, string password)
-        {
-            return _repository.AuthenticateUser(username, password);
-        }
-
         public void CreateUser(string username, string password)
         {
             _repository.CreateUser(username, password);
         }
 
-        public bool DidUserLogin(int userId)
+        public int GetAuthenticatedUserId(string token)
         {
-            return _repository.DidUserLogin(userId);
+            return _repository.GetAuthenticatedUserId(token);
+        }
+
+        public void RemoveUser(int id, string token)
+        {
+            _repository.RemoveUser(id, token);
         }
 
         public void UpdateUser(int id, string username, string password)

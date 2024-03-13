@@ -1,7 +1,5 @@
-﻿using NLayer.Core.DTOs;
-using NLayer.Core.Entities;
+﻿using NLayer.Core.Entities;
 using NLayer.Core.Models;
-using System.Reflection.Metadata.Ecma335;
 
 namespace NLayer.Service.Mappers
 {
@@ -23,7 +21,6 @@ namespace NLayer.Service.Mappers
             return entity;
 
         }
-
         public static GenreViewModel ToViewModel(Genre genre)
         {
             return new GenreViewModel
@@ -34,13 +31,11 @@ namespace NLayer.Service.Mappers
             
 
         }
-
         public static List<GenreViewModel> ToViewModelList(IEnumerable<Genre> genres)
         {
             return genres.Select(ToViewModel).ToList();
 
         }
-
 
     }
 }

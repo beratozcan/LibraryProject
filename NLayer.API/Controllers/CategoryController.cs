@@ -1,114 +1,163 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using NLayer.Core.DTOs;
 using NLayer.Core.Services;
+using NLayer.Service.Exceptions;
 using NLayer.Service.Mappers;
 
 namespace NLayer.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class CategoryController : CustomController
     {
-        
         private readonly ICategoryService _service;
         private readonly IUserService _userService;
-        
-        public CategoryController(ICategoryService service, IUserService userservice)
+        private readonly IUserTokenService _userTokenService;
+        public CategoryController(ICategoryService service, IUserService userservice, IUserTokenService userTokenService)
         {
-            
             _service = service;
             _userService = userservice;
+            _userTokenService = userTokenService;
         }
 
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
+            var didUserAuthenticate = _userTokenService.DidUserAuthenticate(HttpContext);
 
-                var categories = await _service.GetAllAsync();
+            if(didUserAuthenticate)
+            {
+                var accessToken = _userTokenService.TakeAccessToken(HttpContext);
+
+                var categories = await _service.GetAllAsync(accessToken);
                 var categoriesModel = CategoryMapper.ToViewWithBooksModelList(categories);
 
                 return CreateActionResult(CustomResponseModel<List<CategoryWithBooksViewModel>>.Success(200, categoriesModel));
+            }
+
+            return Unauthorized("User authenticate degil");
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetById( int id)
+        public async Task<IActionResult> GetById(int id)
         {
-            try
-            {
-                var category = await _service.GetByIdAsync(id);
-                var categoryModel = CategoryMapper.ToViewWithBooksModel(category);
+            var didUserAuthenticate = _userTokenService.DidUserAuthenticate(HttpContext);
 
-                return CreateActionResult(CustomResponseModel<CategoryWithBooksViewModel>.Success(200, categoryModel));
-            }
-            catch (Exception ex)
+            if (didUserAuthenticate)
             {
-                return NotFound(ex.Message);
-            }
+                try
+                {
+                    var accessToken = _userTokenService.TakeAccessToken(HttpContext);
+                    var category = await _service.GetByIdAsync(id, accessToken);
+                    var categoryModel = CategoryMapper.ToViewWithBooksModel(category);
 
-            
+                    return CreateActionResult(CustomResponseModel<CategoryWithBooksViewModel>.Success(200, categoryModel));
+                }
+                catch (NotFoundException ex)
+                {
+                    return NotFound(ex.Message);
+                }
+                catch (UnauthorizedAccessException ex)
+                {
+                    return Unauthorized(ex.Message);
+                }
+                catch (Exception ex)
+                {
+                    return StatusCode(500, ex.Message);
+                }
+            }
+            else
+            {
+                return Unauthorized("User is not authenticated.");
+            }
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create(CategoryCreateModel categoryModel, int id)
+        public async Task<IActionResult> Create(CategoryCreateModel categoryModel)
         {
-            var didUserLogin = _userService.DidUserLogin(id);
 
-            if(didUserLogin)
+            var didUserAuthenticate = _userTokenService.DidUserAuthenticate(HttpContext);
+
+            if(didUserAuthenticate)
             {
-                var category = await _service.AddAsync(CategoryMapper.ToEntity(categoryModel));
+                var accessToken = _userTokenService.TakeAccessToken(HttpContext);
+
+                var userId = _userService.GetAuthenticatedUserId(accessToken);
+
+                var category = CategoryMapper.ToEntity(categoryModel);
+
+                category.UserId = userId;
+
+                await _service.AddAsync(category);
 
                 var _categoryModel = CategoryMapper.ToViewModel(category);
 
                 return CreateActionResult(CustomResponseModel<CategoryViewModel>.Success(201, _categoryModel));
+                
             }
-            else
-            {
-                throw new Exception("Kullanici login degil");
-            }  
+            return Unauthorized("User is not authenticated");
+
+
         }
 
         [HttpPut]
-        public async Task<IActionResult> Update(int id, CategoryUpdateModel categoryModel,int updatedCategoryId)
+        public async Task<IActionResult> Update(CategoryUpdateModel categoryModel,int updatedCategoryId)
         {
-            var didUserLogin = _userService.DidUserLogin(id);
-            
-
-            if(didUserLogin )
+            var didUserAuthenticate = _userTokenService.DidUserAuthenticate(HttpContext);
+            if(didUserAuthenticate)
             {
-                var categoryEntity = await _service.GetByIdAsync(updatedCategoryId);
+                try
+                {
+                    var accessToken = _userTokenService.TakeAccessToken(HttpContext);
+                    var categoryEntity = await _service.GetByIdAsync(updatedCategoryId, accessToken);
 
-                await _service.UpdateAsync(CategoryMapper.ToEntity(categoryModel, categoryEntity));
+                    await _service.UpdateAsync(CategoryMapper.ToEntity(categoryModel, categoryEntity));
 
-                return CreateActionResult(CustomResponseModel<NoContentModel>.Success(204));
+                    return CreateActionResult(CustomResponseModel<NoContentModel>.Success(204));
+                }
+                catch(UnauthorizedAccessException ex)
+                {
+                    return Unauthorized(ex.Message);
+                }
+                catch (NotFoundException ex)
+                {
+                    return NotFound(ex.Message);
+                }
+                catch (Exception ex)
+                {
+                    return StatusCode(500, ex.Message);
+                }
             }
-           
-            else
-            {
-                throw new Exception("Kullanici login degil");
-            }    
+
+            return Unauthorized("User is not authenticated");
         }
 
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(int id, int deletedCategoryId)
+        [HttpDelete]
+        public async Task<IActionResult> Delete(int deletedCategoryId)
         {
-            var didUserLogin = _userService.DidUserLogin(id);
-            
+            var didUserAuthenticated = _userTokenService.DidUserAuthenticate(HttpContext);
 
-            if (didUserLogin)
+            if(didUserAuthenticated)
             {
-                var entity = await _service.GetByIdAsync(deletedCategoryId);
+                var accessToken = _userTokenService.TakeAccessToken(HttpContext);
+                try
+                {
+                    _service.RemoveCategory(deletedCategoryId,accessToken);
 
-                await _service.RemoveAsync(entity);
-
-                return CreateActionResult(CustomResponseModel<NoContentModel>.Success(204));
-
+                    return CreateActionResult(CustomResponseModel<NoContentModel>.Success(204));
+                }
+                catch(NotFoundException ex)
+                {
+                    return NotFound(ex.Message);
+                }
+                catch (UnauthorizedAccessException ex)
+                {
+                    return Unauthorized(ex.Message);
+                }
             }
-            else
-            {
-                throw new Exception("Kullanici login degil");
-            }
-            
+            return Unauthorized("User is not authenticated");
         }
-
     }
 }

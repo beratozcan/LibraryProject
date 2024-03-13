@@ -1,9 +1,7 @@
 ﻿using NLayer.Core;
 using NLayer.Core.Repositories;
 using NLayer.Core.Services;
-using NLayer.Service.Exceptions;
 using System.Linq.Expressions;
-
 
 namespace NLayer.Service.Services
 {
@@ -34,14 +32,14 @@ namespace NLayer.Service.Services
             return await _repository.AnyAsync(predicate);
         }
 
-        public async Task<ICollection<T>> GetAllAsync()
+        public async Task<ICollection<T>> GetAllAsync(string token)
         {
-            return await _repository.GetAllAsync();
+            return await _repository.GetAllAsync(token);
         }
 
-        public async Task<T> GetByIdAsync(int id)
+        public async Task<T> GetByIdAsync(int id, string token)
         {
-            return await _repository.GetByIdAsync(id);
+            return await _repository.GetByIdAsync(id,token);
                 
         }
         public async Task RemoveAsync(T entity)

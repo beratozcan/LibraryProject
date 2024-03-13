@@ -1,4 +1,5 @@
-﻿using Microsoft.IdentityModel.Tokens;
+﻿using Microsoft.Extensions.Configuration;
+using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Cryptography;
 using System.Text;
@@ -12,16 +13,17 @@ namespace NLayer.API.Security
             Token token = new Token();
 
             SymmetricSecurityKey securityKey = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(configuration["JwtSettings:Key"]));
+                Encoding.UTF8.GetBytes(configuration["JwtSettings:Key"]!));
 
             SigningCredentials credentials = new SigningCredentials(
                 securityKey, SecurityAlgorithms.HmacSha256);
 
             token.Expiration = DateTime.Now.AddMinutes(Convert.ToInt16(configuration["JwtSettings:Expiration"]));
+            token.RefreshTokenExpiration = DateTime.Now.AddMinutes(Convert.ToInt16(configuration["JwtSettings:Expiration"]));
 
             JwtSecurityToken jwtSecurityToken = new JwtSecurityToken(
 
-                issuer: configuration["JwtSettings: Issuer"],
+                issuer: configuration["JwtSettings:Issuer"],
                 audience: configuration["JwtSettings:Audience"],
                 expires: token.Expiration,
                 notBefore: DateTime.Now,

@@ -1,6 +1,5 @@
 ﻿using NLayer.Core.Entities;
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace NLayer.Core.Models
 {
@@ -38,7 +37,6 @@ namespace NLayer.Core.Models
 
         public virtual BookStatus? BookStatus { get; set; }
 
-        // [InverseProperty("Books")]
         public virtual User? Borrower { get; set; }
 
         public virtual ICollection<BookCategory>? BookCategories { get; set; }

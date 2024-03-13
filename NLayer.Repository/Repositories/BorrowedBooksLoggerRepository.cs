@@ -5,10 +5,9 @@ namespace NLayer.Repository.Repositories
 {
     public class BorrowedBooksLoggerRepository : GenericRepository<BookBorrowing>, IBorrowedBooksLoggerRepository
     {
-        public BorrowedBooksLoggerRepository(AppDbContext context) : base(context) 
+        public BorrowedBooksLoggerRepository(AppDbContext context, IUserTokenRepository userTokenRepository) : base(context) 
         {
         }
-
 
         public async Task LogBorrowedBookHistoryAsync(int bookId, int borrowerId)
         {
@@ -27,7 +26,7 @@ namespace NLayer.Repository.Repositories
         {
             
             var bookEntity = _context.BorrowingLogs
-                                     .SingleOrDefault(b =>  b.BookId == bookId);
+                                     .FirstOrDefault(b =>  b.BookId == bookId);
 
             if(bookEntity != null)
             {

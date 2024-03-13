@@ -21,5 +21,4 @@ namespace NLayer.Core.Models
         public string Name { get; set; } = null!;
     }
 
-
 }

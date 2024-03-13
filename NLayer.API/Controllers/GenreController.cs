@@ -1,109 +1,174 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using NLayer.Core.DTOs;
 using NLayer.Core.Models;
 using NLayer.Core.Services;
+using NLayer.Service.Exceptions;
 using NLayer.Service.Mappers;
 
 namespace NLayer.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class GenreController : CustomController
     {
 
         private readonly IGenreService _service;
-        private readonly IUserService _userService;
+        private readonly IUserTokenService _userTokenService;
 
-        public GenreController(IGenreService service, IUserService userService)
+        public GenreController(IGenreService service, IUserTokenService userTokenService)
         {
             _service = service;
-            _userService = userService;
+            _userTokenService = userTokenService;
         }
 
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-                var genres = await _service.GetAllAsync();
-                var genresModel = GenreMapper.ToViewModelList(genres);
+            var didUserAuthenticate = _userTokenService.DidUserAuthenticate(HttpContext);
 
-                return CreateActionResult(CustomResponseModel<List<GenreViewModel>>.Success(200, genresModel));
+            if(didUserAuthenticate)
+            {
+                var accessToken = _userTokenService.TakeAccessToken(HttpContext);
+                try
+                { 
+                    var genres = await _service.GetAllAsync(accessToken);
+                    var genresModel = GenreMapper.ToViewModelList(genres);
+
+                    return CreateActionResult(CustomResponseModel<List<GenreViewModel>>.Success(200, genresModel));
+
+                }
+                catch (NotFoundException ex)
+                {
+                    return NotFound($"Genre not found ");
+                }
+                catch (Exception ex)
+                {
+                    return StatusCode(500, ex.Message);
+                }
+            }
+            return Unauthorized("User is not authenticated");
         }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
-            try
+
+            var didUserAuthenticate = _userTokenService.DidUserAuthenticate(HttpContext);
+
+            if(didUserAuthenticate)
             {
-                var genre = await _service.GetByIdAsync(id);
-                var genreModel = GenreMapper.ToViewModel(genre);
+                var accessToken = _userTokenService.TakeAccessToken(HttpContext);
 
-                return CreateActionResult(CustomResponseModel<GenreViewModel>.Success(200, genreModel));
+                try
+                {
+                    var genre = await _service.GetByIdAsync(id, accessToken);
+                    var genreModel = GenreMapper.ToViewModel(genre);
 
+                    return CreateActionResult(CustomResponseModel<GenreViewModel>.Success(200, genreModel));
+
+                }
+                catch (NotFoundException ex)
+                {
+                    return NotFound($"Genre not found: {id}");
+                }
+                catch (Exception ex)
+                {   
+                    return StatusCode(500, ex.Message);
+                }
             }
-            catch (Exception ex)
-            {
-                return NotFound(ex.Message);
-            }
 
+            return Unauthorized("User is not authenticated");
             
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create(GenreCreateModel GenreModel,int id)
+        public async Task<IActionResult> Create(GenreCreateModel GenreModel)
         {
-            var didUserLogin = _userService.DidUserLogin(id);
-            
-            if(didUserLogin)
-            {
-                var genre = await _service.AddAsync(GenreMapper.ToEntity(GenreModel));
 
-                var _genreModel = GenreMapper.ToViewModel(genre);
+            var didUserAuthenticate = _userTokenService.DidUserAuthenticate(HttpContext);
 
-                return CreateActionResult(CustomResponseModel<GenreViewModel>.Success(201, _genreModel));
+            if (didUserAuthenticate)
+            {   
+                try
+                {
+                    var genre = await _service.AddAsync(GenreMapper.ToEntity(GenreModel));
+
+                    var _genreModel = GenreMapper.ToViewModel(genre);
+
+                    return CreateActionResult(CustomResponseModel<GenreViewModel>.Success(201, _genreModel));
+                }
+                
+                catch (Exception ex)
+                {
+                    return StatusCode(500, ex.Message);
+                }
             }
-            else
-            {
-                throw new Exception("Kullanici login degil");
-            }
-            
+            return Unauthorized("User is not authenticated");
         }
 
         [HttpPut]
-        public async Task<IActionResult> Update(int updatedGenreId, GenreUpdateModel genreModel, int id)
+        public async Task<IActionResult> Update(int updatedGenreId, GenreUpdateModel genreModel)
         {
-            var didUserLogin = _userService.DidUserLogin(id);
+            var didUserAuthenticate = _userTokenService.DidUserAuthenticate(HttpContext);
 
-            if(didUserLogin)
+            if(didUserAuthenticate)
             {
-                var genreEntity = await _service.GetByIdAsync(updatedGenreId);
+                var accessToken = _userTokenService.TakeAccessToken(HttpContext);
+                try
+                {
+                    var genreEntity = await _service.GetByIdAsync(updatedGenreId, accessToken);
 
-                await _service.UpdateAsync(GenreMapper.ToEntity(genreModel, genreEntity));
+                    await _service.UpdateAsync(GenreMapper.ToEntity(genreModel, genreEntity));
 
-                return CreateActionResult(CustomResponseModel<NoContentModel>.Success(204));
+                    return CreateActionResult(CustomResponseModel<NoContentModel>.Success(204));
+
+                }
+                catch (NotFoundException ex)
+                {
+
+                    return NotFound($"Genre not found with ID: {updatedGenreId}");
+                }
+                catch (Exception ex)
+                {
+                    return StatusCode(500, ex.Message);
+                }
             }
-            else
-            {
-                throw new Exception("Kullanici login degil");
-            }
+
+            return Unauthorized("User is not authenticated");
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(int deletedUserId, int id)
+        public async Task<IActionResult> Delete(int id)
         {
-            var didUserLogin = _userService.DidUserLogin(id);
-            if (didUserLogin)
-            {
-                var entity = await _service.GetByIdAsync(deletedUserId);
+            var didUserAuthenticate = _userTokenService.DidUserAuthenticate(HttpContext);
 
-                await _service.RemoveAsync(entity);
-
-                return CreateActionResult(CustomResponseModel<NoContentModel>.Success(204));
-            }
-            else
+            if(didUserAuthenticate)
             {
-                throw new Exception("Kullanici login degil");
+                var accessToken = _userTokenService.TakeAccessToken(HttpContext);
+
+                try
+                {
+                    var entity = await _service.GetByIdAsync(id, accessToken);
+
+                    await _service.RemoveAsync(entity);
+
+                    return CreateActionResult(CustomResponseModel<NoContentModel>.Success(204));
+
+                }
+                catch (NotFoundException ex)
+                {
+
+                    return NotFound($"Genre not found with ID: {id}");
+                }
+                catch (Exception ex)
+                {
+                    return StatusCode(500, ex.Message);
+                }
             }
-            
+
+            return Unauthorized("User is not authenticated");
         }
     }
 }

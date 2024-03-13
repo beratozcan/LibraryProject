@@ -9,16 +9,16 @@ namespace NLayer.Service.Services
     {
 
         private readonly ICategoryRepository _repository;
-        
 
         public CategoryService(IUnitOfWork unitOfWork, ICategoryRepository categoryRepository)
             : base(categoryRepository, unitOfWork)
-        {
-            
+        { 
             _repository = categoryRepository;
-
+            
         }
-
-       
+        public void RemoveCategory(int categoryId, string token)
+        {
+            _repository.RemoveCategory(categoryId, token);
+        }
     }
 }

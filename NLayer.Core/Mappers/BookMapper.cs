@@ -13,13 +13,9 @@ public static class BookMapper
             Publisher = model.Publisher,
             Page = model.Page,
             BookStatusId = model.BookStatusId,
-            OwnerId = model.OwnerId,
             GenreId = model.GenreId,
-            
-           
         };
     }
-
     public static Book ToEntity(BookUpdateModel model, Book entity)
     {
         entity.Name = model.Name ?? entity.Name;
@@ -28,8 +24,6 @@ public static class BookMapper
         entity.Page = model.Page;
         entity.BookStatusId = model.BookStatusId;
         entity.GenreId = model.GenreId;
-        
-        
 
         return entity;
     }
@@ -45,8 +39,6 @@ public static class BookMapper
             PublishDate = book.PublishDate,
             Page = book.Page,
             BookStatusId = book.BookStatusId,
-            /*Categories =  book.BookCategories == null ?  []  : book.BookCategories.
-            Select(x => CategoryMapper.ToViewModel(x.Category)).ToList() */
             GenreId = book.GenreId ,
             OwnerId= book.OwnerId,
             BorrowerId = book.BorrowerId

@@ -4,14 +4,12 @@ using NLayer.Core.Models;
 namespace NLayer.Service.Mappers;
 
 public static class UserMapper
-{
-
+{ 
     public static User ToEntity(UserCreateModel model)
     {
         return new User
         {
-            UserName = model.UserName,
-            //Password = model.Password
+            UserName = model.UserName, 
         };
     }
 
@@ -30,7 +28,6 @@ public static class UserMapper
     public static User ToEntity(UserUpdateModel model, User entity)
     {
         entity.UserName = model.UserName;
-        //entity.Password = model.Password;
 
         return entity;
     }

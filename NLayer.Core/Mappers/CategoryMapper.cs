@@ -2,16 +2,14 @@
 using NLayer.Core.Models;
 
 namespace NLayer.Service.Mappers;
-
 public static class CategoryMapper
 {
     public static Category ToEntity(CategoryCreateModel model)
     {
         return new Category
         {
-            
             Name = model.Name,
-            
+            UserId = 1 
         };
     }
 
@@ -24,7 +22,7 @@ public static class CategoryMapper
         {
             Id = model.Id,
             Name = model.Name,
-            //Books =  model.BookCategories == null ? [] : model.BookCategories.Select(x => BookMapper.ToViewModel(x.Book!)).ToList(),
+            
         };
     }
 
@@ -42,7 +40,6 @@ public static class CategoryMapper
 
     }
 
-
     public static Category ToEntity(CategoryUpdateModel model, Category entity)
     {
         entity.Name = model.Name;
@@ -54,9 +51,7 @@ public static class CategoryMapper
         
         if(categories == null) return null;
 
-
         return categories.Select(ToViewModel).ToList()!;
-
         
     }
 
@@ -65,16 +60,9 @@ public static class CategoryMapper
 
         if (categories == null) return null;
 
-
         return categories.Select(ToViewWithBooksModel).ToList()!;
 
-
     }
-
-
-
-
-
 
 }
 
